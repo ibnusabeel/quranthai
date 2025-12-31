@@ -1,0 +1,222 @@
+---
+import Layout from '../components/Layout.astro';
+import BookCard from '../components/BookCard.astro';
+import { getCollection } from 'astro:content';
+
+// โหลดข้อมูลจากไฟล์ MDX จริงๆ
+const allBooks = await getCollection('books');
+
+// แปลงข้อมูลให้อยู่ในรูปแบบที่ BookCard ต้องการ
+const books = allBooks.map(book => ({
+  slug: book.id.replace(/\.(mdoc|mdx)$/, ''), // ลบ extension ออก
+  title: book.data.title,
+  titleThai: book.data.titleThai,
+  titleArabic: book.data.titleArabic || '',
+  author: book.data.author,
+  description: book.body ? (book.body.slice(0, 100) + '...') : 'ไม่มีคำอธิบาย', // แสดงส่วนหนึ่งของเนื้อหา
+}));
+---
+
+<Layout title="หน้าแรก">
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          สารานุกรมตัฟซีร<br/>
+          <span class="hero-subtitle">อัลกุรอาน</span>
+        </h1>
+        <p class="hero-description">
+          ศึกษาคำอธิบายอัลกุรอานภาษาไทย จากตัฟซีรที่เชื่อถือได้
+          <br/>พร้อมต้นฉบับภาษาอาหรับและคำแปลที่เข้าใจง่าย
+        </p>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-number">{books.length}</div>
+            <div class="stat-label">ตัฟซีร</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">114</div>
+            <div class="stat-label">ซูเราะห์</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">6,236</div>
+            <div class="stat-label">อายะฮ์</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="books-section">
+    <div class="container">
+      <h2 class="section-title">ตัฟซีรที่มีในสารานุกรม</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {books.map(book => (
+          <BookCard
+            title={book.title}
+            titleThai={book.titleThai}
+            titleArabic={book.titleArabic}
+            author={book.author}
+            description={book.description}
+            slug={book.slug}
+          />
+        ))}
+      </div>
+
+      
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+    color: var(--color-text-on-primary);
+    padding: var(--space-20) 0 var(--space-16);
+    margin-bottom: var(--space-12);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .hero-title {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-4);
+    line-height: var(--leading-tight);
+  }
+
+  .hero-subtitle {
+    background: linear-gradient(90deg, var(--color-secondary-400), var(--color-secondary-600));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-description {
+    font-size: var(--text-xl);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-8);
+    opacity: 0.95;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .stat-item {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    transition: all var(--transition-base);
+  }
+
+  .stat-item:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-4px);
+  }
+
+  .stat-number {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-secondary-400);
+  }
+
+  .stat-label {
+    font-size: var(--text-base);
+    margin-top: var(--space-2);
+    opacity: 0.9;
+  }
+
+  .books-section {
+    padding-bottom: var(--space-12);
+  }
+
+  .section-title {
+    font-size: var(--text-3xl);
+    text-align: center;
+    margin-bottom: var(--space-8);
+    color: var(--color-primary-700);
+  }
+
+  .coming-soon-card {
+    margin-top: var(--space-8);
+    background: linear-gradient(135deg, var(--color-neutral-100) 0%, var(--color-secondary-100) 100%);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
+    border: 2px dashed var(--color-secondary-500);
+  }
+
+  .coming-soon-content h3 {
+    font-size: var(--text-2xl);
+    color: var(--color-primary-700);
+    margin-bottom: var(--space-4);
+  }
+
+  .coming-soon-content p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-3);
+  }
+
+  .coming-soon-content ul {
+    list-style: none;
+    display: grid;
+    gap: var(--space-2);
+    margin-left: var(--space-4);
+  }
+
+  .coming-soon-content li {
+    color: var(--color-primary-600);
+    font-weight: var(--font-medium);
+  }
+
+  .coming-soon-content li::before {
+    content: '✨ ';
+    margin-right: var(--space-2);
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: var(--space-12) 0 var(--space-10);
+    }
+
+    .hero-title {
+      font-size: var(--text-3xl);
+    }
+
+    .hero-stats {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3);
+    }
+
+    .stat-number {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

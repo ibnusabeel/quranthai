@@ -1,0 +1,175 @@
+---
+import Layout from '../../../../components/Layout.astro';
+import { getEntry, getCollection } from 'astro:content';
+import { SURAHS } from '../../../../data/surahs';
+
+const { book, surah, slug } = Astro.params;
+
+// Pad surah number to 3 digits (e.g. 4 -> "004") matching the file structure
+const surahPad = surah?.toString().padStart(3, '0');
+const entryId = `${book}/${surahPad}/${slug}`;
+
+const entry = await getEntry('tafsir', entryId);
+
+if (!entry) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = await entry.render();
+
+// Enrich Data
+const surahInfo = SURAHS.find(s => s.number === entry.data.surahNumber);
+const bookEntry = await getEntry('books', Astro.params.book as string);
+
+const bookTitle = bookEntry?.data.titleThai || Astro.params.book;
+const surahName = surahInfo?.nameThai || `ซูเราะห์ที่ ${entry.data.surahNumber}`;
+---
+
+<Layout title={`${surahName} - อายะฮ์ ${entry.data.ayahStart}-${entry.data.ayahEnd}`}>
+  <div class="container"><br>
+    <nav class="breadcrumb">
+      <a href="/">หน้าแรก</a>
+      <span class="separator">›</span>
+      <a href={`/tafsir/${Astro.params.book}`}>{bookTitle}</a>
+      <span class="separator">›</span>
+      <a href={`/tafsir/${Astro.params.book}/${entry.data.surahNumber}`}>{surahName}</a>
+      <span class="separator">›</span>
+      <span class="current">อายะฮ์ {entry.data.ayahStart}-{entry.data.ayahEnd}</span>
+    </nav>
+
+    <article class="tafsir-content">
+      <header class="entry-header">
+        <div class="meta-badges">
+          <span class="badge-surah">{surahName}</span>
+          <span class="badge-ayah">อายะฮ์ {entry.data.ayahStart}-{entry.data.ayahEnd}</span>
+        </div>
+        <h1 class="entry-title">{entry.data.title || `บทอธิบายช่วงอายะฮ์ที่ ${entry.data.ayahStart}-${entry.data.ayahEnd}`}</h1>
+      </header>
+      
+      {entry.data.ayahs && entry.data.ayahs.length > 0 && (
+        <section class="ayahs-section">
+          {entry.data.ayahs.map((ayah: any) => (
+            <div class="ayah-block">
+              <div class="ayah-header">
+                <span class="ayah-number-badge">อายะฮ์ที่ {ayah.ayahNumber}</span>
+              </div>
+              {ayah.arabic && <p class="ayah-arabic">{ayah.arabic}</p>}
+              {ayah.thai && <p class="ayah-thai">{ayah.thai}</p>}
+            </div>
+          ))}
+        </section>
+      )}
+
+      <div class="content-body">
+        <Content />
+      </div>
+
+      <div class="entry-footer">
+        <a href={`/tafsir/${Astro.params.book}/${entry.data.surahNumber}`} class="btn-back">
+          ← กลับไปหน้ารวมซูเราะห์
+        </a>
+      </div>
+    </article>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-6); font-size: var(--text-sm); color: var(--color-text-secondary); flex-wrap: wrap; }
+  .breadcrumb a { color: var(--color-primary-600); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; color: var(--color-secondary-500); }
+  .separator { color: var(--color-text-disabled); }
+  .current { color: var(--color-text-primary); font-weight: 500; }
+  
+  .tafsir-content {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    max-width: 900px;
+    margin: 0 auto;
+    border: 1px solid var(--color-neutral-100);
+  }
+  
+  .entry-header {
+    background: linear-gradient(135deg, var(--color-primary-50), var(--color-surface));
+    padding: var(--space-8) var(--space-8) var(--space-4);
+    border-bottom: 1px solid var(--color-neutral-100);
+  }
+  
+  .meta-badges { display: flex; gap: var(--space-3); margin-bottom: var(--space-4); }
+  
+  .badge-surah { 
+    background: var(--color-primary-100); 
+    color: var(--color-primary-700); 
+    padding: 4px 12px; 
+    border-radius: 20px; 
+    font-weight: 500; 
+    font-size: 0.9em;
+    border: 1px solid var(--color-primary-200);
+  }
+  
+  .badge-ayah { 
+    background: var(--color-secondary-100); 
+    color: var(--color-secondary-700); 
+    padding: 4px 12px; 
+    border-radius: 20px; 
+    font-weight: 500; 
+    font-size: 0.9em;
+    border: 1px solid var(--color-secondary-200);
+  }
+  
+  .entry-title { font-size: var(--text-2xl); color: var(--color-text-primary); line-height: 1.4; margin-bottom: 0; }
+  
+  /* Ayah List Styles */
+  .ayahs-section {
+    padding: var(--space-6) var(--space-8);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-neutral-100);
+  }
+  
+  .ayah-block {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px dashed var(--color-neutral-200);
+  }
+  .ayah-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  
+  .ayah-number-badge {
+    display: inline-block;
+    background: var(--color-neutral-100);
+    color: var(--color-text-secondary);
+    font-size: 0.8em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: var(--space-3);
+  }
+  
+  .ayah-arabic {
+    font-family: 'Amiri', 'Traditional Arabic', serif;
+    font-size: 1.8em;
+    line-height: 2;
+    text-align: right;
+    color: var(--color-primary-600);
+    margin-bottom: var(--space-3);
+  }
+  :global([data-theme='dark']) .ayah-arabic { color: var(--color-primary-400); }
+
+  .ayah-thai {
+    font-size: 1.1em;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+  }
+
+  .content-body { padding: var(--space-8); font-size: 1.1em; line-height: 1.8; color: var(--color-text-primary); }
+  
+  .entry-footer { padding: var(--space-6); border-top: 1px solid var(--color-neutral-100); background: var(--color-surface-variant); }
+  .btn-back { display: inline-flex; color: var(--color-primary-600); font-weight: 500; text-decoration: none; transition: color 0.2s; }
+  .btn-back:hover { color: var(--color-secondary-500); }
+  
+  @media (max-width: 640px) {
+    .content-body { padding: var(--space-5); }
+    .entry-header { padding: var(--space-5); }
+    .ayahs-section { padding: var(--space-5); }
+    .ayah-arabic { font-size: 1.5em; }
+  }
+</style>

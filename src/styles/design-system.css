@@ -1,0 +1,248 @@
+/* ==========================================
+   MODERN FLAT MATERIAL DESIGN SYSTEM
+   Theme: Navy Blue, White, Gold (Premium & Trustworthy)
+   ========================================== */
+
+:root {
+  /* === Color Palette === */
+  /* Primary - Navy Blue (Deep & Authoritative) */
+  --color-primary-50: hsl(215, 60%, 97%);
+  --color-primary-100: hsl(215, 60%, 90%);
+  --color-primary-200: hsl(215, 60%, 80%);
+  --color-primary-300: hsl(215, 60%, 65%);
+  --color-primary-400: hsl(215, 60%, 50%);
+  --color-primary-500: hsl(215, 85%, 40%);
+  --color-primary-600: hsl(215, 90%, 30%);
+  /* Main Brand Color */
+  --color-primary-700: hsl(215, 90%, 25%);
+  --color-primary-800: hsl(215, 85%, 20%);
+  --color-primary-900: hsl(215, 85%, 15%);
+
+  /* Secondary - Gold (Premium Accent) */
+  --color-secondary-50: hsl(48, 100%, 96%);
+  --color-secondary-100: hsl(48, 100%, 88%);
+  --color-secondary-200: hsl(48, 100%, 75%);
+  --color-secondary-300: hsl(48, 95%, 60%);
+  --color-secondary-400: hsl(48, 95%, 50%);
+  --color-secondary-500: hsl(45, 100%, 48%);
+  /* Vivid Gold */
+  --color-secondary-600: hsl(45, 100%, 40%);
+  --color-secondary-700: hsl(45, 100%, 32%);
+
+  /* Neutral Colors (Cool Greys to match Navy) */
+  --color-neutral-50: hsl(215, 20%, 98%);
+  --color-neutral-100: hsl(215, 20%, 95%);
+  --color-neutral-200: hsl(215, 15%, 90%);
+  --color-neutral-300: hsl(215, 12%, 80%);
+  --color-neutral-400: hsl(215, 10%, 60%);
+  --color-neutral-500: hsl(215, 15%, 45%);
+  --color-neutral-600: hsl(215, 20%, 35%);
+  --color-neutral-700: hsl(215, 30%, 25%);
+  --color-neutral-800: hsl(215, 40%, 15%);
+  --color-neutral-900: hsl(215, 50%, 10%);
+
+  /* Semantic Colors */
+  --color-success: hsl(150, 60%, 40%);
+  --color-warning: hsl(40, 90%, 50%);
+  --color-error: hsl(0, 70%, 50%);
+  --color-info: hsl(200, 90%, 50%);
+
+  /* Surface Colors */
+  --color-background: var(--color-neutral-50);
+  --color-surface: #ffffff;
+  --color-surface-variant: var(--color-neutral-100);
+
+  /* Text Colors */
+  --color-text-primary: var(--color-primary-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-disabled: var(--color-neutral-400);
+  --color-text-on-primary: #ffffff;
+
+  /* === Typography === */
+  /* Font Families */
+  --font-primary: 'Sarabun', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-arabic: 'Amiri', 'Traditional Arabic', 'Arabic Typesetting', serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+  /* Font Sizes - Responsive Scale */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 1.875rem);
+  --text-3xl: clamp(1.875rem, 1.65rem + 1.125vw, 2.25rem);
+  --text-4xl: clamp(2.25rem, 1.95rem + 1.5vw, 3rem);
+  --text-5xl: clamp(3rem, 2.5rem + 2.5vw, 4rem);
+
+  /* Font Weights */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* === Spacing === */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* === Border Radius === */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* === Material Design Shadows === */
+  --shadow-sm: 0 1px 2px 0 rgb(30 40 50 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(30 40 50 / 0.1), 0 2px 4px -2px rgb(30 40 50 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(30 40 50 / 0.1), 0 4px 6px -4px rgb(30 40 50 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(30 40 50 / 0.1), 0 8px 10px -6px rgb(30 40 50 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(30 40 50 / 0.25);
+
+  /* === Transitions === */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === Z-Index === */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal: 1300;
+  --z-popover: 1400;
+  --z-tooltip: 1500;
+
+  /* === Container === */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+}
+
+/* ==========================================
+   DARK MODE SUPPORT
+   ========================================== */
+[data-theme='dark'] {
+  /* Backgrounds: Deep Naval Theme */
+  --color-background: hsl(218, 25%, 10%);
+  /* Very Dark Navy */
+  --color-surface: hsl(218, 25%, 15%);
+  /* Slightly lighter surface */
+  --color-surface-variant: hsl(218, 25%, 20%);
+  /* Card headers/footers */
+
+  /* Text: Inverted for contrast */
+  --color-text-primary: hsl(218, 20%, 96%);
+  /* Almost White */
+  --color-text-secondary: hsl(218, 15%, 75%);
+  /* Soft Grey-Blue */
+  --color-text-disabled: hsl(218, 10%, 45%);
+  --color-text-on-primary: #ffffff;
+  /* Keep white text on primary buttons */
+
+  /* Primary Brand Colors (INVERTED for text visibility) */
+  /* In Light Mode: 50=Light -> 900=Dark */
+  /* In Dark Mode:  50=Dark (bg) -> 900=Light (text) */
+
+  --color-primary-50: hsl(218, 30%, 18%);
+  /* Dark highlight */
+  --color-primary-100: hsl(218, 30%, 25%);
+  --color-primary-200: hsl(218, 40%, 35%);
+  --color-primary-300: hsl(218, 50%, 45%);
+  --color-primary-400: hsl(215, 70%, 55%);
+  --color-primary-500: hsl(215, 80%, 65%);
+  /* Bright Main Blue */
+  --color-primary-600: hsl(215, 90%, 75%);
+  /* Lighter highlight */
+  --color-primary-700: hsl(215, 95%, 85%);
+  /* Very light (for headings) */
+  --color-primary-800: hsl(215, 100%, 92%);
+  /* Near white */
+  --color-primary-900: hsl(215, 100%, 97%);
+  /* White tint */
+
+  /* Secondary Gold Colors (Adjusted for Dark Mode) */
+  --color-secondary-50: hsl(45, 30%, 20%);
+  --color-secondary-100: hsl(45, 30%, 30%);
+  --color-secondary-500: hsl(45, 90%, 50%);
+  /* Keep vivid gold */
+  --color-secondary-600: hsl(45, 90%, 65%);
+  /* Lighter gold for text */
+  --color-secondary-700: hsl(45, 90%, 80%);
+  /* Very light gold */
+
+  /* Neutrals (Borders & Separators) */
+  --color-neutral-100: hsl(218, 20%, 22%);
+  /* Faint border */
+  --color-neutral-200: hsl(218, 20%, 30%);
+  /* Stronger border */
+  --color-neutral-300: hsl(218, 15%, 40%);
+  --color-neutral-800: hsl(218, 20%, 90%);
+  /* Inverted dark neutral */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-background: hsl(218, 25%, 10%);
+    --color-surface: hsl(218, 25%, 15%);
+    --color-surface-variant: hsl(218, 25%, 20%);
+
+    --color-text-primary: hsl(218, 20%, 96%);
+    --color-text-secondary: hsl(218, 15%, 75%);
+    --color-text-disabled: hsl(218, 10%, 45%);
+    --color-text-on-primary: #ffffff;
+
+    --color-primary-50: hsl(218, 30%, 18%);
+    --color-primary-100: hsl(218, 30%, 25%);
+    --color-primary-200: hsl(218, 40%, 35%);
+    --color-primary-300: hsl(218, 50%, 45%);
+    --color-primary-400: hsl(215, 70%, 55%);
+    --color-primary-500: hsl(215, 80%, 65%);
+    --color-primary-600: hsl(215, 90%, 75%);
+    --color-primary-700: hsl(215, 95%, 85%);
+    --color-primary-800: hsl(215, 100%, 92%);
+    --color-primary-900: hsl(215, 100%, 97%);
+
+    --color-secondary-50: hsl(45, 30%, 20%);
+    --color-secondary-100: hsl(45, 30%, 30%);
+    --color-secondary-500: hsl(45, 90%, 50%);
+    --color-secondary-600: hsl(45, 90%, 65%);
+    --color-secondary-700: hsl(45, 90%, 80%);
+
+    --color-neutral-100: hsl(218, 20%, 22%);
+    --color-neutral-200: hsl(218, 20%, 30%);
+    --color-neutral-300: hsl(218, 15%, 40%);
+    --color-neutral-800: hsl(218, 20%, 90%);
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6);
+  }
+}

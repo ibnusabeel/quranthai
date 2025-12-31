@@ -1,0 +1,90 @@
+---
+interface Props {
+  title: string;
+  titleThai: string;
+  titleArabic: string;
+  author: string;
+  description: string;
+  slug: string;
+}
+
+const { title, titleThai, titleArabic, author, description, slug } = Astro.props;
+---
+
+<article class="book-card">
+  <div class="book-card-content">
+    <div class="book-header">
+      <h3 class="book-title">{titleThai}</h3>
+      <p class="book-title-arabic text-arabic">{titleArabic}</p>
+    </div>
+    
+    <div class="book-meta">
+      <span class="badge">ผู้เขียน: {author}</span>
+    </div>
+    
+    <p class="book-description">{description}</p>
+    
+    <a href={`/tafsir/${slug}`} class="btn btn-primary view-link">
+      เปิดอ่านตัฟซีร →
+    </a>
+  </div>
+</article>
+
+<style>
+  .book-card {
+    background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-primary-50) 100%);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+    border: 1px solid var(--color-neutral-200);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .book-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+    border-color: var(--color-primary-300);
+  }
+
+  .book-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    flex: 1;
+  }
+
+  .book-header {
+    border-bottom: 2px solid var(--color-primary-200);
+    padding-bottom: var(--space-3);
+  }
+
+  .book-title {
+    font-size: var(--text-2xl);
+    color: var(--color-primary-700);
+    margin-bottom: var(--space-2);
+  }
+
+  .book-title-arabic {
+    font-size: var(--text-xl);
+    color: var(--color-secondary-600);
+  }
+
+  .book-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .book-description {
+    color: var(--color-text-secondary);
+    line-height: var(--leading-relaxed);
+    flex: 1;
+  }
+
+  .view-link {
+    margin-top: auto;
+  }
+</style>

@@ -1,0 +1,371 @@
+---
+import Layout from '../../../components/Layout.astro';
+import SurahCard from '../../../components/SurahCard.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { SURAHS } from '../../../data/surahs';
+
+const { book } = Astro.params;
+
+// โหลดข้อมูลหนังสือจากไฟล์ MDX
+const bookEntry = await getEntry('books', book as string);
+
+// โหลดซูเราะห์ทั้งหมดของหนังสือนี้
+const allTafsir = await getCollection('tafsir');
+const bookTafsir = allTafsir.filter(entry => entry.id.startsWith(`${book}/`));
+
+// จัดกลุ่มตามซูเราะห์ และดึงชื่อจาก SURAHS database
+const surahsMap = new Map();
+bookTafsir.forEach(entry => {
+  const surahNum = entry.data.surahNumber;
+  const surahData = SURAHS.find(s => s.number === surahNum);
+  
+  if (!surahsMap.has(surahNum) && surahData) {
+    surahsMap.set(surahNum, {
+      number: surahData.number,
+      name: surahData.nameThai,
+      nameArabic: surahData.nameArabic,
+      slug: entry.id.replace(/\.(mdoc|mdx)$/, ''),
+      ayahRange: `อายะฮ์ ${entry.data.ayahStart}-${entry.data.ayahEnd}`
+    });
+  }
+});
+
+const surahs = Array.from(surahsMap.values()).sort((a, b) => a.number - b.number);
+---
+
+<Layout title={bookEntry?.data.titleThai || 'Tafsir'}>
+  <div class="container"><br>
+
+    <div class="book-header">
+      <a href="/" class="back-link">← กลับหน้าแรก</a>
+      
+      <div class="book-info">
+        <h1 class="book-title">{bookEntry?.data.titleThai}</h1>
+        <p class="book-title-arabic text-arabic">{bookEntry?.data.titleArabic}</p>
+        <p class="book-author">ผู้เขียน: {bookEntry?.data.author}</p>
+      </div>
+    </div>
+
+    <section class="surahs-table-section">
+      <h2 class="section-title">สารบัญซูเราะห์ (114 ซูเราะห์)</h2>
+      
+      <div class="table-container">
+        <table class="surah-table">
+          <thead>
+            <tr>
+              <th class="th-number">ลำดับ</th>
+              <th class="th-arabic">ซูเราะห์ (อาหรับ)</th>
+              <th class="th-thai">ซูเราะห์ (ไทย)</th>
+              <th class="th-type">ประเภท</th>
+              <th class="th-ayahs">จำนวนอายะฮ์</th>
+              <th class="th-action">สถานะ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {SURAHS.map((surah) => {
+              const hasContent = surahsMap.has(surah.number);
+              return (
+                <tr class={hasContent ? 'row-active' : 'row-inactive'}>
+                  <td class="td-number">{surah.number}</td>
+                  <td class="td-arabic text-arabic">{surah.nameArabic}</td>
+                  <td class="td-thai">{surah.nameThai}</td>
+                  <td class="td-type" data-ayah-count={surah.ayahCount}>
+                    <span class={`badge ${surah.type === 'Makkah' ? 'badge-makkah' : 'badge-madinah'}`}>
+                      {surah.type === 'Makkah' ? 'มักกียะฮฺ' : 'มะดะนียะฮฺ'}
+                    </span>
+                  </td>
+                  <td class="td-ayahs">{surah.ayahCount}</td>
+                  <td class="td-action">
+                    {hasContent ? (
+                      <a href={`/tafsir/${book}/${surah.number}`} class="btn-read">
+                        อ่านตัฟซีร
+                      </a>
+                    ) : (
+                      <span class="text-muted">-</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="add-more-notice">
+        <p>💡 <strong>สำหรับผู้ดูแลระบบ:</strong> <a href="/keystatic" class="cms-link">เข้าสู่ CMS</a> เพื่อเพิ่มเนื้อหาตัฟซีรในซูเราะห์ที่ยังว่างอยู่</p>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+/* ... Existing Styles ... */
+  .book-header { margin-bottom: var(--space-8); }
+  .back-link { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: var(--space-2); 
+    color: var(--color-text-secondary); 
+    font-weight: var(--font-medium); 
+    margin-bottom: var(--space-6); 
+    text-decoration: none; 
+    transition: color var(--transition-fast);
+  }
+  .back-link:hover { color: var(--color-primary-600); }
+
+  .book-info { 
+    /* Force Vibrant Navy Gradient (Original Look) irrespective of theme mode */
+    background: linear-gradient(135deg, hsl(215, 90%, 30%), hsl(215, 85%, 20%)); 
+    color: white !important; 
+    padding: var(--space-8); 
+    border-radius: var(--radius-xl); 
+    box-shadow: var(--shadow-xl); 
+    border-left: 6px solid var(--color-secondary-500); /* Gold Accent */
+    position: relative;
+    overflow: hidden;
+  }
+  /* Decorative subtle circle */
+  .book-info::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, hsla(48, 100%, 50%, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .book-title { font-size: var(--text-4xl); margin-bottom: var(--space-2); color: white; font-weight: 800; }
+  .book-title-arabic { font-size: var(--text-3xl); opacity: 0.9; margin-bottom: var(--space-4); color: var(--color-secondary-200); }
+  .book-author { color: var(--color-primary-200); font-size: var(--text-lg); }
+
+  .surahs-table-section {
+    background: var(--color-surface);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-neutral-100);
+  }
+
+  .section-title {
+    font-size: var(--text-xl);
+    color: var(--color-primary-700);
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--color-secondary-200);
+    display: inline-block;
+  }
+
+  /* Table Styles */
+  .table-container {
+    overflow-x: auto;
+    margin-bottom: var(--space-8);
+  }
+  
+  .surah-table {
+    width: 100%;
+    border-collapse: separate; /* Allows border-radius on rows */
+    border-spacing: 0 var(--space-2); /* Spacing between rows */
+    min-width: 800px;
+  }
+  
+  .surah-table th {
+    color: var(--color-text-secondary);
+    padding: var(--space-4);
+    text-align: left;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-neutral-200);
+  }
+
+  .surah-table td {
+    padding: var(--space-4);
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-neutral-100);
+    border-bottom: 1px solid var(--color-neutral-100);
+    color: var(--color-text-primary);
+    transition: background-color 0.2s, transform 0.2s;
+  }
+  
+  /* First/Last rounding for "Card-like" rows */
+  .surah-table td:first-child { border-left: 1px solid var(--color-neutral-100); border-top-left-radius: var(--radius-lg); border-bottom-left-radius: var(--radius-lg); }
+  .surah-table td:last-child { border-right: 1px solid var(--color-neutral-100); border-top-right-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); }
+
+  /* Light Mode Hover */
+  .row-active:hover td { 
+    background-color: var(--color-primary-50); 
+    border-color: var(--color-primary-200);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* DARK MODE SPECIFIC OVERRIDES */
+  :global([data-theme='dark']) .surah-table td {
+    background-color: var(--color-surface);
+    color: var(--color-neutral-50); /* Force readable white */
+    border-color: var(--color-neutral-200);
+  }
+  
+  :global([data-theme='dark']) .row-active:hover td {
+    background-color: var(--color-neutral-200) !important; /* Distinct lighter grey, NOT white */
+    color: white !important; /* Crisp white text */
+    border-color: var(--color-primary-600);
+  }
+
+  .row-inactive { opacity: 0.5; pointer-events: none; }
+
+  .text-arabic { font-family: 'Amiri', serif; font-size: 1.4em; }
+  
+  .td-number { font-weight: bold; color: var(--color-primary-500); }
+  :global([data-theme='dark']) .td-number { color: var(--color-primary-400); } /* Brighter blue in dark mode */
+
+  .td-thai { font-weight: 600; font-size: 1.1em; }
+
+  .badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge-makkah { 
+    background-color: hsla(25, 100%, 50%, 0.1); 
+    color: hsla(25, 100%, 40%, 1); 
+    border: 1px solid hsla(25, 100%, 50%, 0.2);
+  }
+  :global([data-theme='dark']) .badge-makkah { color: hsla(25, 100%, 70%, 1); }
+
+  .badge-madinah { 
+    background-color: hsla(140, 100%, 40%, 0.1); 
+    color: hsla(140, 100%, 35%, 1); 
+    border: 1px solid hsla(140, 100%, 40%, 0.2);
+  }
+  :global([data-theme='dark']) .badge-madinah { color: hsla(140, 100%, 65%, 1); }
+
+  .btn-read {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    color: var(--color-primary-600);
+    background: transparent;
+    border: 1px solid var(--color-primary-200);
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-read:hover { 
+    background: var(--color-primary-600); 
+    color: white; 
+    border-color: var(--color-primary-600);
+  }
+  :global([data-theme='dark']) .btn-read { color: var(--color-primary-400); border-color: var(--color-primary-400); }
+  :global([data-theme='dark']) .btn-read:hover { background: var(--color-primary-500); color: black; border-color: var(--color-primary-500); }
+  
+  .text-muted { color: var(--color-text-disabled); }
+  
+  .add-more-notice {
+    background: var(--color-surface-variant);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--color-secondary-500);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-6);
+  }
+
+  /* Mobile Responsive Card View */
+  @media (max-width: 768px) {
+    .surahs-table-section { padding: var(--space-4); background: transparent; border: none; box-shadow: none; }
+    .table-container { overflow: visible; }
+    .surah-table { min-width: 0; display: block; border-spacing: 0; }
+    .surah-table thead { display: none; }
+    .surah-table tbody { display: flex; flex-direction: column; gap: var(--space-4); }
+    
+    .surah-table tr {
+      display: grid;
+      grid-template-areas: 
+        "header header text-arabic"
+        "meta meta meta"
+        "action action action";
+      grid-template-columns: 1fr 1fr auto;
+      gap: var(--space-3);
+      
+      background: var(--color-surface);
+      padding: var(--space-5);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-neutral-200);
+      border-left: 4px solid var(--color-primary-500);
+    }
+    
+    :global([data-theme='dark']) .surah-table tr {
+      background: var(--color-surface-variant);
+      border-color: var(--color-neutral-200);
+    }
+
+    .surah-table td { 
+      padding: 0; 
+      border: none !important; 
+      border-radius: 0 !important; 
+      background: transparent !important; 
+    }
+    
+    .td-number { display: inline-block; font-size: 0.9em; color: var(--color-neutral-500); font-weight: normal; margin-right: 8px; }
+    .td-number::before { content: '#'; }
+
+    .td-thai { 
+      grid-area: header; 
+      font-size: 1.25rem; 
+      font-weight: bold; 
+      color: var(--color-text-primary); 
+      display: flex;
+      align-items: center;
+    }
+    
+    .td-arabic { 
+      grid-area: text-arabic; 
+      text-align: right; 
+      color: var(--color-primary-600); 
+      font-size: 1.5rem;
+    }
+    :global([data-theme='dark']) .td-arabic { color: var(--color-primary-400); }
+    
+    .td-type { 
+      grid-area: meta; 
+      display: flex; 
+      gap: var(--space-3); 
+      align-items: center;
+      margin-top: var(--space-1);
+    }
+    
+    .td-ayahs { display: none; } 
+
+    /* Helper for mobile meta info */
+    .td-type::after {
+      content: attr(data-ayah-count) ' อายะฮ์';
+      color: var(--color-text-secondary);
+      font-size: 0.9em;
+    }
+    
+    .td-action { grid-area: action; margin-top: var(--space-2); }
+    .btn-read { 
+      display: flex; 
+      width: 100%; 
+      text-align: center; 
+      padding: 10px; 
+      background: var(--color-primary-50); 
+      color: var(--color-primary-700); 
+      border: none;
+    }
+    :global([data-theme='dark']) .btn-read {
+       background: var(--color-neutral-200);
+       color: white;
+    }
+  }

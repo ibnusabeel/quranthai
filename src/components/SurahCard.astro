@@ -1,0 +1,96 @@
+---
+interface Props {
+  surahNumber: number;
+  surahName: string;
+  surahNameArabic: string;
+  bookSlug: string;
+  slug: string;
+  ayahRange: string;
+}
+
+const { surahNumber, surahName, surahNameArabic, bookSlug, slug, ayahRange } = Astro.props;
+---
+
+<a href={`/tafsir/${bookSlug}/${slug}`} class="surah-card">
+  <div class="surah-number">
+    <span class="number">{surahNumber}</span>
+  </div>
+  
+  <div class="surah-info">
+    <h4 class="surah-name">{surahName}</h4>
+    <p class="surah-name-arabic text-arabic">{surahNameArabic}</p>
+    <span class="ayah-range">{ayahRange}</span>
+  </div>
+  
+  <div class="arrow">→</div>
+</a>
+
+<style>
+  .surah-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--color-neutral-200);
+  }
+
+  .surah-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+    border-color: var(--color-primary-300);
+    background: linear-gradient(90deg, var(--color-surface) 0%, var(--color-primary-50) 100%);
+  }
+
+  .surah-number {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+    color: var(--color-text-on-primary);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-bold);
+    font-size: var(--text-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .surah-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .surah-name {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .surah-name-arabic {
+    font-size: var(--text-base);
+    color: var(--color-secondary-600);
+  }
+
+  .ayah-range {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .arrow {
+    font-size: var(--text-xl);
+    color: var(--color-primary-600);
+    transition: transform var(--transition-fast);
+  }
+
+  .surah-card:hover .arrow {
+    transform: translateX(4px);
+  }
+</style>
