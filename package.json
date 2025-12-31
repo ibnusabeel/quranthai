@@ -9,8 +9,8 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/markdoc": "^0.15.10",
-    "@astrojs/node": "^9.5.1",
     "@astrojs/react": "^4.4.2",
     "@keystatic/astro": "^5.0.6",
     "@keystatic/core": "^0.5.48",
