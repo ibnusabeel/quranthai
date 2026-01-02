@@ -109,6 +109,29 @@ a:hover {
    UTILITY CLASSES
    ========================================== */
 
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-primary-600);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.logo:hover {
+    color: var(--color-primary-700);
+    text-decoration: none;
+}
+
+.logo-img {
+    height: 300px;
+    width: auto;
+    margin: auto
+}
+
+
 .container {
     width: 100%;
     max-width: var(--container-xl);

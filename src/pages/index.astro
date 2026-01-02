@@ -23,40 +23,18 @@ const books = allBooks.map((book) => ({
     <div class="hero-bg-pattern"></div>
     <div class="container">
       <div class="hero-content">
-        <div class="hero-badge">
-          <span class="badge-icon">✨</span>
-          <span>สารานุกรมตัฟซีรออนไลน์</span>
-        </div>
+        <a href="/" class="logo">
+          <img src="/logo.png" alt="QuranThai Logo" class="logo-img" />
+        </a>
 
         <h1 class="hero-title">
-          ศึกษาคำอธิบาย<br />
-          <span class="hero-highlight">อัลกุรอาน</span><br />
-          ภาษาไทย
+          <span class="hero-highlight">กุรอ่านไทย</span><br />
         </h1>
 
         <p class="hero-description">
           เว็บไซต์รวบรวมตัฟซีร (คำอธิบาย) อัลกุรอานภาษาไทย<br />
           จากนักวิชาการที่เชื่อถือได้ พร้อมต้นฉบับภาษาอาหรับ
         </p>
-
-        <div class="hero-cta">
-          <a href="#books" class="btn btn-hero-primary">
-            <span>เริ่มศึกษา</span>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7"></path>
-            </svg>
-          </a>
-          <a href="/keystatic" class="btn btn-hero-secondary">
-            <span>เข้าสู่ CMS</span>
-          </a>
-        </div>
 
         <div class="hero-stats">
           <div class="stat-card">
@@ -123,7 +101,7 @@ const books = allBooks.map((book) => ({
       hsl(215, 90%, 15%) 100%
     );
     color: white;
-    padding: var(--space-24) 0 var(--space-20);
+    padding: var(--space-10) 0 var(--space-20);
     position: relative;
     overflow: hidden;
   }
