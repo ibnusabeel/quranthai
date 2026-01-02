@@ -1,94 +1,151 @@
 ---
-import Layout from '../components/Layout.astro';
-import BookCard from '../components/BookCard.astro';
-import { getCollection } from 'astro:content';
+import Layout from "../components/Layout.astro";
+import BookCard from "../components/BookCard.astro";
+import { getCollection } from "astro:content";
 
 // โหลดข้อมูลจากไฟล์ MDX จริงๆ
-const allBooks = await getCollection('books');
+const allBooks = await getCollection("books");
 
 // แปลงข้อมูลให้อยู่ในรูปแบบที่ BookCard ต้องการ
-const books = allBooks.map(book => ({
-  slug: book.id.replace(/\.(mdoc|mdx)$/, ''), // ลบ extension ออก
+const books = allBooks.map((book) => ({
+  slug: book.id.replace(/\.(mdoc|mdx)$/, ""), // ลบ extension ออก
   title: book.data.title,
   titleThai: book.data.titleThai,
-  titleArabic: book.data.titleArabic || '',
+  titleArabic: book.data.titleArabic || "",
   author: book.data.author,
-  description: book.body ? (book.body.slice(0, 100) + '...') : 'ไม่มีคำอธิบาย', // แสดงส่วนหนึ่งของเนื้อหา
+  description: book.body ? book.body.slice(0, 100) + "..." : "ไม่มีคำอธิบาย", // แสดงส่วนหนึ่งของเนื้อหา
 }));
 ---
 
 <Layout title="หน้าแรก">
+  <!-- Hero Section -->
   <section class="hero">
+    <div class="hero-bg-pattern"></div>
     <div class="container">
       <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-icon">✨</span>
+          <span>สารานุกรมตัฟซีรออนไลน์</span>
+        </div>
+
         <h1 class="hero-title">
-          สารานุกรมตัฟซีร<br/>
-          <span class="hero-subtitle">อัลกุรอาน</span>
+          ศึกษาคำอธิบาย<br />
+          <span class="hero-highlight">อัลกุรอาน</span><br />
+          ภาษาไทย
         </h1>
+
         <p class="hero-description">
-          ศึกษาคำอธิบายอัลกุรอานภาษาไทย จากตัฟซีรที่เชื่อถือได้
-          <br/>พร้อมต้นฉบับภาษาอาหรับและคำแปลที่เข้าใจง่าย
+          เว็บไซต์รวบรวมตัฟซีร (คำอธิบาย) อัลกุรอานภาษาไทย<br />
+          จากนักวิชาการที่เชื่อถือได้ พร้อมต้นฉบับภาษาอาหรับ
         </p>
+
+        <div class="hero-cta">
+          <a href="#books" class="btn btn-hero-primary">
+            <span>เริ่มศึกษา</span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7"></path>
+            </svg>
+          </a>
+          <a href="/keystatic" class="btn btn-hero-secondary">
+            <span>เข้าสู่ CMS</span>
+          </a>
+        </div>
+
         <div class="hero-stats">
-          <div class="stat-item">
-            <div class="stat-number">{books.length}</div>
-            <div class="stat-label">ตัฟซีร</div>
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-content">
+              <div class="stat-number">{books.length}</div>
+              <div class="stat-label">ตัฟซีร</div>
+            </div>
           </div>
-          <div class="stat-item">
-            <div class="stat-number">114</div>
-            <div class="stat-label">ซูเราะห์</div>
+          <div class="stat-card">
+            <div class="stat-icon">📖</div>
+            <div class="stat-content">
+              <div class="stat-number">114</div>
+              <div class="stat-label">ซูเราะห์</div>
+            </div>
           </div>
-          <div class="stat-item">
-            <div class="stat-number">6,236</div>
-            <div class="stat-label">อายะฮ์</div>
+          <div class="stat-card">
+            <div class="stat-icon">✍️</div>
+            <div class="stat-content">
+              <div class="stat-number">6,236</div>
+              <div class="stat-label">อายะฮ์</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="books-section">
+  <!-- Books Section -->
+  <section class="books-section" id="books">
     <div class="container">
-      <h2 class="section-title">ตัฟซีรที่มีในสารานุกรม</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {books.map(book => (
-          <BookCard
-            title={book.title}
-            titleThai={book.titleThai}
-            titleArabic={book.titleArabic}
-            author={book.author}
-            description={book.description}
-            slug={book.slug}
-          />
-        ))}
+      <div class="section-header">
+        <h2 class="section-title">ตัฟซีรที่มีในระบบ</h2>
+        <p class="section-subtitle">
+          เลือกอ่านตัฟซีรจากนักวิชาการที่คุณต้องการ
+        </p>
       </div>
 
-      
+      <div class="books-grid">
+        {
+          books.map((book) => (
+            <BookCard
+              title={book.title}
+              titleThai={book.titleThai}
+              titleArabic={book.titleArabic}
+              author={book.author}
+              description={book.description}
+              slug={book.slug}
+            />
+          ))
+        }
+      </div>
     </div>
   </section>
 </Layout>
 
 <style>
+  /* ==================== HERO SECTION ==================== */
   .hero {
-    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
-    color: var(--color-text-on-primary);
-    padding: var(--space-20) 0 var(--space-16);
-    margin-bottom: var(--space-12);
+    background: linear-gradient(
+      135deg,
+      hsl(215, 90%, 25%) 0%,
+      hsl(215, 85%, 20%) 50%,
+      hsl(215, 90%, 15%) 100%
+    );
+    color: white;
+    padding: var(--space-24) 0 var(--space-20);
     position: relative;
     overflow: hidden;
   }
 
-  .hero::before {
-    content: '';
+  .hero-bg-pattern {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-      radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    opacity: 0.1;
+    background-image:
+      radial-gradient(
+        circle at 20% 30%,
+        var(--color-secondary-500) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 70%,
+        var(--color-primary-400) 0%,
+        transparent 50%
+      );
     pointer-events: none;
   }
 
@@ -96,118 +153,223 @@ const books = allBooks.map(book => ({
     position: relative;
     z-index: 1;
     text-align: center;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    padding: var(--space-2) var(--space-5);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    margin-bottom: var(--space-8);
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .badge-icon {
+    font-size: var(--text-lg);
   }
 
   .hero-title {
     font-size: var(--text-5xl);
     font-weight: var(--font-bold);
-    margin-bottom: var(--space-4);
     line-height: var(--leading-tight);
+    margin-bottom: var(--space-6);
+    animation: fadeInUp 0.6s ease-out 0.1s both;
   }
 
-  .hero-subtitle {
-    background: linear-gradient(90deg, var(--color-secondary-400), var(--color-secondary-600));
+  .hero-highlight {
+    background: linear-gradient(
+      135deg,
+      var(--color-secondary-400) 0%,
+      var(--color-secondary-600) 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    position: relative;
+    display: inline-block;
   }
 
   .hero-description {
     font-size: var(--text-xl);
     line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-10);
     opacity: 0.95;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: center;
+    margin-bottom: var(--space-12);
+    animation: fadeInUp 0.6s ease-out 0.3s both;
+  }
+
+  .btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: linear-gradient(
+      135deg,
+      var(--color-secondary-500),
+      var(--color-secondary-600)
+    );
+    color: var(--color-primary-900);
+    padding: var(--space-4) var(--space-8);
+    border-radius: var(--radius-full);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-lg);
+    text-decoration: none;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 14px 0 rgba(218, 165, 32, 0.39);
+  }
+
+  .btn-hero-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(218, 165, 32, 0.5);
+  }
+
+  .btn-hero-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: var(--space-4) var(--space-8);
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-lg);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .btn-hero-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
   }
 
   .hero-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-6);
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
   }
 
-  .stat-item {
-    background-color: rgba(255, 255, 255, 0.15);
+  .stat-card {
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-xl);
     padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
     transition: all var(--transition-base);
   }
 
-  .stat-item:hover {
-    background-color: rgba(255, 255, 255, 0.25);
+  .stat-card:hover {
+    background: rgba(255, 255, 255, 0.15);
     transform: translateY(-4px);
+    border-color: var(--color-secondary-400);
+  }
+
+  .stat-icon {
+    font-size: var(--text-3xl);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .stat-content {
+    text-align: center;
   }
 
   .stat-number {
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
     font-weight: var(--font-bold);
     color: var(--color-secondary-400);
+    line-height: 1;
+    margin-bottom: var(--space-1);
   }
 
   .stat-label {
     font-size: var(--text-base);
-    margin-top: var(--space-2);
     opacity: 0.9;
-  }
-
-  .books-section {
-    padding-bottom: var(--space-12);
-  }
-
-  .section-title {
-    font-size: var(--text-3xl);
-    text-align: center;
-    margin-bottom: var(--space-8);
-    color: var(--color-primary-700);
-  }
-
-  .coming-soon-card {
-    margin-top: var(--space-8);
-    background: linear-gradient(135deg, var(--color-neutral-100) 0%, var(--color-secondary-100) 100%);
-    border-radius: var(--radius-xl);
-    padding: var(--space-8);
-    border: 2px dashed var(--color-secondary-500);
-  }
-
-  .coming-soon-content h3 {
-    font-size: var(--text-2xl);
-    color: var(--color-primary-700);
-    margin-bottom: var(--space-4);
-  }
-
-  .coming-soon-content p {
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-3);
-  }
-
-  .coming-soon-content ul {
-    list-style: none;
-    display: grid;
-    gap: var(--space-2);
-    margin-left: var(--space-4);
-  }
-
-  .coming-soon-content li {
-    color: var(--color-primary-600);
     font-weight: var(--font-medium);
   }
 
-  .coming-soon-content li::before {
-    content: '✨ ';
-    margin-right: var(--space-2);
+  /* ==================== BOOKS SECTION ==================== */
+  .books-section {
+    padding: var(--space-20) 0;
+    background: var(--color-background);
   }
 
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-12);
+  }
+
+  .section-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-primary-700);
+    margin-bottom: var(--space-3);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+  }
+
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--space-8);
+  }
+
+  /* ==================== ANIMATIONS ==================== */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ==================== RESPONSIVE ==================== */
   @media (max-width: 768px) {
     .hero {
-      padding: var(--space-12) 0 var(--space-10);
+      padding: var(--space-16) 0 var(--space-12);
     }
 
     .hero-title {
       font-size: var(--text-3xl);
+    }
+
+    .hero-description {
+      font-size: var(--text-base);
+    }
+
+    .hero-cta {
+      flex-direction: column;
+      align-items: stretch;
     }
 
     .hero-stats {
@@ -215,8 +377,85 @@ const books = allBooks.map(book => ({
       gap: var(--space-3);
     }
 
+    .stat-card {
+      padding: var(--space-4);
+    }
+
+    .stat-icon {
+      font-size: var(--text-xl);
+    }
+
     .stat-number {
+      font-size: var(--text-xl);
+    }
+
+    .stat-label {
+      font-size: var(--text-sm);
+    }
+
+    .books-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    .section-title {
       font-size: var(--text-2xl);
     }
+  }
+
+  @media (max-width: 480px) {
+    .hero-badge {
+      font-size: var(--text-xs);
+      padding: var(--space-2) var(--space-4);
+    }
+
+    .btn-hero-primary,
+    .btn-hero-secondary {
+      font-size: var(--text-base);
+      padding: var(--space-3) var(--space-6);
+    }
+  }
+
+  /* ==================== DARK MODE ==================== */
+  :global([data-theme="dark"]) .hero {
+    background: linear-gradient(
+      135deg,
+      hsl(218, 35%, 15%) 0%,
+      hsl(218, 40%, 10%) 50%,
+      hsl(218, 45%, 8%) 100%
+    );
+  }
+
+  :global([data-theme="dark"]) .hero-bg-pattern {
+    opacity: 0.15;
+  }
+
+  :global([data-theme="dark"]) .hero-badge {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  :global([data-theme="dark"]) .stat-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  :global([data-theme="dark"]) .stat-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--color-secondary-500);
+  }
+
+  :global([data-theme="dark"]) .section-title {
+    color: var(--color-primary-500);
+  }
+
+  :global([data-theme="dark"]) .btn-hero-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  :global([data-theme="dark"]) .btn-hero-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 </style>

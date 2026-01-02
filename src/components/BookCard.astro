@@ -8,7 +8,8 @@ interface Props {
   slug: string;
 }
 
-const { title, titleThai, titleArabic, author, description, slug } = Astro.props;
+const { title, titleThai, titleArabic, author, description, slug } =
+  Astro.props;
 ---
 
 <article class="book-card">
@@ -17,13 +18,13 @@ const { title, titleThai, titleArabic, author, description, slug } = Astro.props
       <h3 class="book-title">{titleThai}</h3>
       <p class="book-title-arabic text-arabic">{titleArabic}</p>
     </div>
-    
+
     <div class="book-meta">
       <span class="badge">ผู้เขียน: {author}</span>
     </div>
-    
+
     <p class="book-description">{description}</p>
-    
+
     <a href={`/tafsir/${slug}`} class="btn btn-primary view-link">
       เปิดอ่านตัฟซีร →
     </a>
@@ -32,21 +33,23 @@ const { title, titleThai, titleArabic, author, description, slug } = Astro.props
 
 <style>
   .book-card {
-    background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-primary-50) 100%);
+    background: var(--color-surface);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
     box-shadow: var(--shadow-md);
     transition: all var(--transition-base);
     border: 1px solid var(--color-neutral-200);
+    border-top: 4px solid var(--color-secondary-500);
     height: 100%;
     display: flex;
     flex-direction: column;
   }
 
   .book-card:hover {
-    box-shadow: var(--shadow-xl);
-    transform: translateY(-4px);
+    box-shadow: var(--shadow-2xl);
+    transform: translateY(-8px);
     border-color: var(--color-primary-300);
+    border-top-color: var(--color-secondary-600);
   }
 
   .book-card-content {
@@ -86,5 +89,28 @@ const { title, titleThai, titleArabic, author, description, slug } = Astro.props
 
   .view-link {
     margin-top: auto;
+  }
+
+  /* Dark Mode */
+  :global([data-theme="dark"]) .book-card {
+    background: var(--color-surface);
+    border-color: var(--color-neutral-700);
+  }
+
+  :global([data-theme="dark"]) .book-card:hover {
+    border-color: var(--color-primary-500);
+    border-top-color: var(--color-secondary-500);
+  }
+
+  :global([data-theme="dark"]) .book-header {
+    border-bottom-color: var(--color-neutral-700);
+  }
+
+  :global([data-theme="dark"]) .book-title {
+    color: var(--color-primary-500);
+  }
+
+  :global([data-theme="dark"]) .book-title-arabic {
+    color: var(--color-secondary-500);
   }
 </style>
