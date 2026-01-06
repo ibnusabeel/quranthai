@@ -1,8 +1,6 @@
 ---
 import Layout from "../../../components/Layout.astro";
 import { getEntry } from "astro:content";
-import { createReader } from "@keystatic/core/reader";
-import keystaticConfig from "../../../../keystatic.config";
 
 export const prerender = false;
 
@@ -11,8 +9,8 @@ const surahNumber = parseInt(surahParam as string);
 const surahSlug = String(surahNumber).padStart(3, "0");
 
 // Fetch from Astro Content Collection (Cloudflare compatible)
-// Use 'as any' for collection name since it comes from dynamic param
-const entry = await getEntry(book as any, surahSlug);
+// The collection is 'tafsir', and the ID is constructed from book/surah
+const entry = await getEntry("tafsir", `${book}/${surahSlug}`);
 
 if (!entry) {
   return Astro.redirect("/404");
