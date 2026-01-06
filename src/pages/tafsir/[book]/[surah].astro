@@ -10,25 +10,15 @@ const { book, surah: surahParam } = Astro.params;
 const surahNumber = parseInt(surahParam as string);
 const surahSlug = String(surahNumber).padStart(3, "0");
 
-// Initialize Keystatic Reader
-const reader = createReader(process.cwd(), keystaticConfig);
-
-// Dynamic collection access (using 'as any' to bypass specific key check for simplicity in dynamic route)
-// The collection names match the book param: 'tafsir-sadi', etc.
-const tafsirCollection =
-  reader.collections[book as keyof typeof reader.collections];
-
-if (!tafsirCollection) {
-  return Astro.redirect("/404");
-}
-
-const entry = await tafsirCollection.read(surahSlug);
+// Fetch from Astro Content Collection (Cloudflare compatible)
+// Use 'as any' for collection name since it comes from dynamic param
+const entry = await getEntry(book as any, surahSlug);
 
 if (!entry) {
   return Astro.redirect("/404");
 }
 
-const { nameThai, nameArabic, ayahs } = entry as any;
+const { nameThai, nameArabic, ayahs } = entry.data;
 
 // Helper to determine if description exists and is not empty
 const hasDescription = (desc: any) => {
