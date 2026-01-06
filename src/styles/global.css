@@ -106,6 +106,36 @@ a:hover {
 }
 
 /* ==========================================
+   ARABIC TEXT IN CONTENT
+   =========================================== */
+
+/* Force Arabic styling for paragraphs with RTL direction or Arabic lang */
+p[dir="rtl"],
+.content-body p[dir="rtl"],
+.tafsir-content p[dir="rtl"],
+p:lang(ar),
+.content-body p:lang(ar),
+.tafsir-content p:lang(ar) {
+    font-family: var(--font-arabic);
+    direction: rtl;
+    text-align: right;
+    line-height: 2;
+    font-size: var(--text-xl);
+}
+
+/* Specific class for Arabic paragraphs that can be added manually or via CMS */
+.arabic-text,
+p.arabic-text,
+div.arabic-text {
+    font-family: var(--font-arabic) !important;
+    direction: rtl !important;
+    text-align: right !important;
+    line-height: 2 !important;
+    font-size: var(--text-xl) !important;
+    margin-bottom: var(--space-4);
+}
+
+/* ==========================================
    UTILITY CLASSES
    ========================================== */
 

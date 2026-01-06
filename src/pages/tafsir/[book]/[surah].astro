@@ -1,137 +1,377 @@
 ---
-import Layout from '../../../components/Layout.astro';
-import { getCollection, getEntry } from 'astro:content';
-import { SURAHS } from '../../../data/surahs';
+import Layout from "../../../components/Layout.astro";
+import { getEntry } from "astro:content";
+import { createReader } from "@keystatic/core/reader";
+import keystaticConfig from "../../../../keystatic.config";
+
+export const prerender = false;
 
 const { book, surah: surahParam } = Astro.params;
 const surahNumber = parseInt(surahParam as string);
+const surahSlug = String(surahNumber).padStart(3, "0");
 
-// โหลดข้อมูลหนังสือ
-const bookEntry = await getEntry('books', book as string);
+// Initialize Keystatic Reader
+const reader = createReader(process.cwd(), keystaticConfig);
 
-// โหลดข้อมูลตัฟซีรทั้งหมดของหนังสือนี้ และกรองเฉพาะซูเราะห์ที่เลือก
-const allTafsir = await getCollection('tafsir');
-const surahEntries = allTafsir
-  .filter(entry => 
-    entry.id.startsWith(`${book}/`) && 
-    entry.data.surahNumber === surahNumber
-  )
-  .sort((a, b) => a.data.ayahStart - b.data.ayahStart); // เรียงตามอายะฮ์
+// Dynamic collection access (using 'as any' to bypass specific key check for simplicity in dynamic route)
+// The collection names match the book param: 'tafsir-sadi', etc.
+const tafsirCollection =
+  reader.collections[book as keyof typeof reader.collections];
 
-// ดึงข้อมูลซูเราะห์จาก Database
-const surahInfo = SURAHS.find(s => s.number === surahNumber);
+if (!tafsirCollection) {
+  return Astro.redirect("/404");
+}
 
-const bookInfo = bookEntry ? {
-  titleThai: bookEntry.data.titleThai,
-  titleArabic: bookEntry.data.titleArabic || ''
-} : null;
+const entry = await tafsirCollection.read(surahSlug);
 
-// Render entries logic removed, now we just pass data
-const entries = surahEntries.map(entry => {
-  const parts = entry.id.split('/');
-  const filename = parts[parts.length - 1]; // get 'part-1' from 'tafsir-sadi/004/part-1.mdoc'
-  const slug = filename.replace(/\.(mdoc|mdx)$/, '');
-  
-  return {
-    ...entry,
-    linkSlug: slug
-  };
-});
+if (!entry) {
+  return Astro.redirect("/404");
+}
+
+const { nameThai, nameArabic, ayahs } = entry as any;
+
+// Helper to determine if description exists and is not empty
+const hasDescription = (desc: any) => {
+  return typeof desc === "string" && desc.trim().length > 0;
+};
+
+// Load Book Info (using Astro getEntry for simple fields)
+const bookEntry = await getEntry("books", book as string);
+const bookInfo = bookEntry
+  ? {
+      titleThai: bookEntry.data.titleThai,
+      titleArabic: bookEntry.data.titleArabic || "",
+    }
+  : null;
 ---
 
-<Layout title={`${surahInfo?.nameThai || 'ตัฟซีร'} - ${bookInfo?.titleThai || 'สารานุกรม'}`}>
-  {surahInfo && bookInfo ? (
-    <>
-      <!-- Hero Section -->
-      <section class="surah-hero">
-        <div class="hero-bg-pattern"></div>
-        <div class="container">
-          <nav class="breadcrumb">
-            <a href="/">หน้าแรก</a>
-            <span class="separator">›</span>
-            <a href={`/tafsir/${book}`}>{bookInfo.titleThai}</a>
-            <span class="separator">›</span>
-            <span class="current">{surahInfo.nameThai}</span>
-          </nav>
+<Layout
+  title={`${nameThai || "ตัฟซีร"} - ${bookInfo?.titleThai || "สารานุกรม"}`}
+>
+  <!-- Hero Section -->
+  <section class="surah-hero">
+    <div class="hero-bg-pattern"></div>
+    <div class="container">
+      <a href={`/tafsir/${book}`} class="back-link">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+        </svg>
+        <span>กลับหน้าสารบัญ</span>
+      </a>
 
-          <div class="hero-content">
-            <div class="surah-badge">ซูเราะห์ที่ {surahInfo.number}</div>
-            <h1 class="surah-title">{surahInfo.nameThai}</h1>
-            <p class="surah-title-arabic text-arabic">{surahInfo.nameArabic}</p>
-            
-            <div class="surah-meta">
-              <span class={`badge ${surahInfo.type === 'Makkah' ? 'badge-makkah' : 'badge-madinah'}`}>
-                {surahInfo.type === 'Makkah' ? 'มักกียะฮฺ' : 'มะดะนียะฮฺ'}
-              </span>
-              <span class="badge badge-ayah">{surahInfo.ayahCount} อายะฮ์</span>
-              <span class="badge badge-articles">{entries.length} บทความ</span>
-            </div>
+      <div class="hero-content">
+        <div class="surah-badge">
+          <span class="badge-icon">📖</span>
+          <span>ซูเราะห์ที่ {surahNumber}</span>
+        </div>
+
+        <h1 class="surah-title">{nameThai}</h1>
+        <p class="surah-title-arabic text-arabic font-amiri">{nameArabic}</p>
+
+        <div class="surah-stats">
+          <div class="stat-item">
+            <div class="stat-icon">🔢</div>
+            <div class="stat-value">{ayahs?.length || 0}</div>
+            <div class="stat-label">จำนวนอายะฮ์</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">📚</div>
+            <div class="stat-value">{bookInfo?.titleThai || "ตัฟซีร"}</div>
+            <div class="stat-label">อ้างอิงจาก</div>
           </div>
         </div>
-      </section>
-
-      <!-- Entries Section -->
-      <section class="entries-section">
-        <div class="container">
-          {entries.length > 0 ? (
-            <div class="entries-grid">
-              {entries.map(entry => (
-                <a href={`/tafsir/${book}/${surahNumber}/${entry.linkSlug}`} class="entry-card">
-                  <div class="card-header">
-                    <div class="ayah-badge">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                      </svg>
-                      อายะฮ์ {entry.data.ayahStart} - {entry.data.ayahEnd}
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <h3 class="card-title">
-                      {entry.data.title || `บทอธิบายช่วงอายะฮ์ที่ ${entry.data.ayahStart}-${entry.data.ayahEnd}`}
-                    </h3>
-                    <div class="read-more">
-                      <span>อ่านเนื้อหา</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"></path>
-                      </svg>
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          ) : (
-             <div class="empty-state">
-               <div class="empty-icon">📖</div>
-               <h3>ยังไม่มีเนื้อหาตัฟซีรในซูเราะห์นี้</h3>
-               <p>เพิ่มเนื้อหาตัฟซีรใหม่ผ่าน CMS</p>
-               <a href="/keystatic" class="btn-add">เพิ่มเนื้อหา +</a>
-             </div>
-          )}
-
-          <nav class="surah-navigation">
-            <a href={`/tafsir/${book}`} class="nav-button">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"></path>
-              </svg>
-              <span>กลับไปสารบัญซูเราะห์</span>
-            </a>
-          </nav>
-        </div>
-      </section>
-    </>
-  ) : (
-    <div class="error-container">
-      <div class="error-message">
-        <h2>ไม่พบข้อมูล</h2>
-        <p>ไม่พบซูเราะห์หรือหนังสือที่ต้องการ</p>
-        <a href={`/tafsir/${book}`} class="btn-primary">กลับไปสารบัญ</a>
       </div>
     </div>
-  )}
+  </section>
+
+  <!-- Search/Filter Section -->
+  <div class="container mb-8 sticky top-4 z-10">
+    <div class="search-wrapper">
+      <span class="search-icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><circle cx="11" cy="11" r="8"></circle><line
+            x1="21"
+            y1="21"
+            x2="16.65"
+            y2="16.65"></line></svg
+        >
+      </span>
+      <input
+        type="text"
+        id="ayah-search"
+        placeholder="ค้นหาอายะฮ์... (พิมพ์หมายเลข หรือข้อความ)"
+        class="search-input"
+        autocomplete="off"
+      />
+      <div id="search-stats" class="search-stats hidden">
+        เจอ <span id="match-count">0</span> อายะฮ์
+      </div>
+    </div>
+  </div>
+
+  <!-- Ayahs Section -->
+  <section class="ayahs-section">
+    <div class="container">
+      {
+        ayahs && ayahs.length > 0 ? (
+          <div class="ayahs-list">
+            {ayahs.map((ayah) => (
+              <>
+                <div class="ayah-card" id={`ayah-${ayah.ayahNumber}`}>
+                  <div class="ayah-header">
+                    <span class="ayah-badge">{ayah.ayahNumber}</span>
+                    <div class="ayah-actions">
+                      {ayah.audio && (
+                        <button
+                          class="btn-audio"
+                          data-audio={ayah.audio}
+                          aria-label="Play Audio"
+                        >
+                          <span class="icon-play">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </span>
+                          <span class="icon-pause">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                            </svg>
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div class="ayah-content">
+                    <p class="arabic-text font-amiri" dir="rtl">
+                      {ayah.arabic}
+                    </p>
+                    <div class="thai-translation">
+                      <p class="thai-text">{ayah.thai}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tafsir/Description Section - Separated Card */}
+                {hasDescription(ayah.description) && (
+                  <div class="tafsir-card">
+                    <div class="tafsir-header">
+                      <span class="tafsir-icon">📖</span>
+                      <span class="font-bold text-secondary-800">
+                        คำอธิบาย (ตัฟซีร) อายะฮฺที่ {ayah.tafsirRange}
+                      </span>
+                    </div>
+                    <div class="tafsir-content-wrapper">
+                      <div class="prose prose-sm max-w-none dark:prose-invert">
+                        <p class="whitespace-pre-wrap">{ayah.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ))}
+          </div>
+        ) : (
+          <div class="empty-state">
+            <p>ไม่พบข้อมูลอายะฮ์</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  {/* Hidden Audio Player */}
+  <audio id="global-player" style="display: none;"></audio>
 </Layout>
 
+<script>
+  // Advanced Audio Player Logic
+  const player = document.getElementById("global-player") as HTMLAudioElement;
+  const buttons = document.querySelectorAll(".btn-audio");
+
+  // --- Start Search Logic ---
+  const searchInput = document.getElementById(
+    "ayah-search",
+  ) as HTMLInputElement;
+  const searchStats = document.getElementById("search-stats");
+  const matchCountSpan = document.getElementById("match-count");
+
+  // Cache original content for highlighting
+  const ayahCards = document.querySelectorAll(".ayah-card");
+  const cardData = new Map();
+
+  ayahCards.forEach((card) => {
+    const arabicEl = card.querySelector(".arabic-text");
+    const thaiEl = card.querySelector(".thai-text");
+    const ayahBadge = card.querySelector(".ayah-badge");
+
+    cardData.set(card, {
+      arabicEl,
+      thaiEl,
+      ayahBadge,
+      originalArabic: arabicEl?.textContent || "",
+      originalThai: thaiEl?.textContent || "",
+      ayahNum: ayahBadge?.textContent || "",
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      const term = (e.target as HTMLInputElement).value.toLowerCase().trim();
+      let matchCount = 0;
+
+      // Helper to highlight text safely
+      const highlightText = (text: string, searchTerm: string) => {
+        if (!searchTerm) return text;
+        const regex = new RegExp(
+          `(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+          "gi",
+        );
+        return text.replace(regex, '<mark class="highlight">$1</mark>');
+      };
+
+      ayahCards.forEach((card) => {
+        const data = cardData.get(card);
+        const cardEl = card as HTMLElement;
+
+        // Logic: Match Number, Arabic, or Thai
+        const isMatch =
+          data.ayahNum.includes(term) ||
+          data.originalArabic.toLowerCase().includes(term) ||
+          data.originalThai.toLowerCase().includes(term);
+
+        // Handle associated Tafsir Card (next sibling)
+        const nextEl = cardEl.nextElementSibling as HTMLElement;
+        const hasTafsir = nextEl && nextEl.classList.contains("tafsir-card");
+
+        if (term === "" || isMatch) {
+          cardEl.style.display = "";
+          if (hasTafsir) nextEl.style.display = "";
+          matchCount++;
+
+          // Apply Highlight
+          if (term !== "") {
+            if (data.arabicEl)
+              data.arabicEl.innerHTML = highlightText(
+                data.originalArabic,
+                term,
+              );
+            if (data.thaiEl)
+              data.thaiEl.innerHTML = highlightText(data.originalThai, term);
+          } else {
+            // Reset
+            if (data.arabicEl) data.arabicEl.textContent = data.originalArabic;
+            if (data.thaiEl) data.thaiEl.textContent = data.originalThai;
+          }
+        } else {
+          cardEl.style.display = "none";
+          if (hasTafsir) nextEl.style.display = "none";
+        }
+      });
+
+      if (searchStats && matchCountSpan) {
+        matchCountSpan.textContent = matchCount.toString();
+        if (term) {
+          searchStats.classList.remove("hidden");
+        } else {
+          searchStats.classList.add("hidden");
+        }
+      }
+    });
+  }
+  // --- End Search Logic ---
+
+  function resetAllButtons() {
+    buttons.forEach((btn) => btn.classList.remove("playing"));
+  }
+
+  function updateButtonState(url: string | null, isPlaying: boolean) {
+    if (!url) return;
+    const btn = document.querySelector(`.btn-audio[data-audio="${url}"]`);
+    if (btn) {
+      if (isPlaying) {
+        btn.classList.add("playing");
+      } else {
+        btn.classList.remove("playing");
+      }
+    }
+  }
+
+  // Player Events
+  player.addEventListener("play", () => {
+    const currentUrl = player.getAttribute("src"); // src prop might be resolved, use stored if needed but direct src usually works
+    // Or better, find via src
+    // Note: player.src is absolute URL.
+    // It's safer to track current playing URL manually or match flexibly.
+    // Let's rely on the button click logic to set active state initially, but 'play' event confirms it.
+    // Actually, iterate buttons to match src
+    buttons.forEach((btn) => {
+      if (player.src.endsWith(btn.getAttribute("data-audio") || "")) {
+        btn.classList.add("playing");
+      } else {
+        btn.classList.remove("playing");
+      }
+    });
+  });
+
+  player.addEventListener("pause", () => {
+    resetAllButtons();
+  });
+
+  player.addEventListener("ended", () => {
+    resetAllButtons();
+  });
+
+  // Button Interaction
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const url = btn.getAttribute("data-audio");
+      if (!url) return;
+
+      // If clicking same button that is playing
+      if (player.src.includes(url) && !player.paused) {
+        player.pause();
+      } else {
+        // Play new
+        resetAllButtons();
+        player.src = url;
+        player.play();
+        btn.classList.add("playing"); // Optimistic UI
+      }
+    });
+  });
+</script>
+
 <style>
-  /* ==================== HERO SECTION ==================== */
+  /* ==================== HERO SECTION (Matched to Book Page) ==================== */
   .surah-hero {
     background: linear-gradient(
       135deg,
@@ -140,7 +380,7 @@ const entries = surahEntries.map(entry => {
       hsl(215, 90%, 15%) 100%
     );
     color: white;
-    padding: var(--space-12) 0 var(--space-10);
+    padding: var(--space-16) 0 var(--space-12);
     position: relative;
     overflow: hidden;
     margin-bottom: var(--space-12);
@@ -154,315 +394,117 @@ const entries = surahEntries.map(entry => {
     bottom: 0;
     opacity: 0.1;
     background-image:
-      radial-gradient(circle at 20% 30%, var(--color-secondary-500) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, var(--color-primary-400) 0%, transparent 50%);
+      radial-gradient(
+        circle at 20% 30%,
+        var(--color-secondary-500) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 70%,
+        var(--color-primary-400) 0%,
+        transparent 50%
+      );
     pointer-events: none;
-  }
-
-  .container {
-    max-width: var(--container-xl);
-    margin: 0 auto;
-    padding: 0 var(--space-6);
   }
 
   .hero-content {
     position: relative;
     z-index: 1;
     text-align: center;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     animation: fadeInUp 0.6s ease-out;
   }
 
-  /* Breadcrumb */
-  .breadcrumb {
-    display: flex;
+  .back-link {
+    display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    margin-bottom: var(--space-8);
-    font-size: var(--text-sm);
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
-  }
-
-  .breadcrumb a {
     color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: color var(--transition-base);
-  }
-
-  .breadcrumb a:hover {
-    color: var(--color-secondary-400);
-  }
-
-  .separator {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  .current {
-    color: white;
     font-weight: var(--font-medium);
+    margin-bottom: var(--space-8);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+  }
+
+  .back-link:hover {
+    color: var(--color-secondary-400);
+    transform: translateX(-4px);
   }
 
   .surah-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     padding: var(--space-2) var(--space-5);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    margin-bottom: var(--space-4);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: var(--space-6);
   }
 
   .surah-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    line-height: var(--leading-tight);
-    margin-bottom: var(--space-3);
+    font-size: 3rem; /* Adjusted for Surah specifics */
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: var(--space-4);
+    color: white;
   }
 
   .surah-title-arabic {
-    font-size: var(--text-3xl);
+    font-size: 2.5rem;
     color: var(--color-secondary-400);
-    margin-bottom: var(--space-6);
-    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-8);
+    opacity: 0.95;
+    line-height: 1.4;
   }
 
-  .surah-meta {
+  .surah-stats {
     display: flex;
-    gap: var(--space-3);
+    gap: var(--space-8);
     justify-content: center;
-    flex-wrap: wrap;
+    margin-top: var(--space-8);
   }
 
-  .badge {
-    background: rgba(255, 255, 255, 0.15);
+  .stat-item {
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-  }
-
-  .badge-makkah {
-    background: rgba(255, 140, 0, 0.2);
-    border-color: rgba(255, 140, 0, 0.4);
-    color: #ffcc99;
-  }
-
-  .badge-madinah {
-    background: rgba(50, 205, 50, 0.2);
-    border-color: rgba(50, 205, 50, 0.4);
-    color: #90ee90;
-  }
-
-  .badge-ayah {
-    background: rgba(218, 165, 32, 0.2);
-    border-color: var(--color-secondary-400);
-    color: var(--color-secondary-300);
-  }
-
-  .badge-articles {
-    background: rgba(100, 150, 255, 0.2);
-    border-color: var(--color-primary-400);
-    color: var(--color-primary-300);
-  }
-
-  /* ==================== ENTRIES SECTION ==================== */
-  .entries-section {
-    padding: 0 0 var(--space-16);
-  }
-
-  .entries-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--space-6);
-    margin-bottom: var(--space-12);
-  }
-
-  .entry-card {
-    display: block;
-    background: var(--color-surface);
-    border: 1px solid var(--color-neutral-200);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-xl);
-    text-decoration: none;
-    color: inherit;
-    transition: all var(--transition-base);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
+    padding: var(--space-4) var(--space-6);
+    min-width: 120px;
+    transition: all 0.2s ease;
   }
 
-  .entry-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-xl);
+  .stat-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
     border-color: var(--color-secondary-400);
   }
 
-  .card-header {
-    background: linear-gradient(135deg, var(--color-primary-50), var(--color-surface));
-    padding: var(--space-4) var(--space-5);
-    border-bottom: 1px solid var(--color-neutral-100);
-  }
-
-  .ayah-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    background: var(--color-secondary-100);
-    color: var(--color-secondary-700);
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-md);
-    font-weight: var(--font-semibold);
-    font-size: var(--text-sm);
-    border: 1px solid var(--color-secondary-200);
-  }
-
-  .card-body {
-    padding: var(--space-5);
-  }
-
-  .card-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--color-text-primary);
-    line-height: var(--leading-snug);
-    margin-bottom: var(--space-4);
-  }
-
-  .read-more {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-primary-600);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    transition: all var(--transition-base);
-  }
-
-  .entry-card:hover .read-more {
-    color: var(--color-secondary-600);
-    gap: var(--space-3);
-  }
-
-  /* Empty State */
-  .empty-state {
-    text-align: center;
-    padding: var(--space-16) var(--space-8);
-    background: var(--color-surface);
-    border-radius: var(--radius-2xl);
-    border: 2px dashed var(--color-neutral-300);
-    max-width: 500px;
-    margin: 0 auto var(--space-12);
-  }
-
-  .empty-icon {
-    font-size: 4rem;
-    margin-bottom: var(--space-4);
-    opacity: 0.5;
-  }
-
-  .empty-state h3 {
-    font-size: var(--text-xl);
-    color: var(--color-text-primary);
+  .stat-icon {
+    font-size: 1.5rem;
     margin-bottom: var(--space-2);
   }
 
-  .empty-state p {
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-6);
+  .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-secondary-400);
+    line-height: 1;
+    margin-bottom: var(--space-1);
   }
 
-  .btn-add {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-6);
-    background: linear-gradient(135deg, var(--color-secondary-500), var(--color-secondary-600));
-    color: var(--color-primary-900);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    font-weight: var(--font-semibold);
-    transition: all var(--transition-base);
-    box-shadow: 0 4px 14px 0 rgba(218, 165, 32, 0.39);
+  .stat-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    font-weight: 500;
   }
 
-  .btn-add:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px 0 rgba(218, 165, 32, 0.5);
-  }
-
-  /* Navigation */
-  .surah-navigation {
-    text-align: center;
-    padding-top: var(--space-8);
-    border-top: 1px solid var(--color-neutral-200);
-  }
-
-  .nav-button {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    font-weight: var(--font-medium);
-    transition: all var(--transition-base);
-    padding: var(--space-3) var(--space-5);
-    border-radius: var(--radius-lg);
-  }
-
-  .nav-button:hover {
-    color: var(--color-primary-600);
-    background: var(--color-primary-50);
-  }
-
-  /* Error State */
-  .error-container {
-    min-height: 60vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
-  }
-
-  .error-message {
-    text-align: center;
-    max-width: 500px;
-  }
-
-  .error-message h2 {
-    font-size: var(--text-3xl);
-    color: var(--color-text-primary);
-    margin-bottom: var(--space-4);
-  }
-
-  .error-message p {
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-6);
-  }
-
-  .btn-primary {
-    display: inline-block;
-    padding: var(--space-3) var(--space-6);
-    background: var(--color-primary-600);
-    color: white;
-    border-radius: var(--radius-lg);
-    text-decoration: none;
-    font-weight: var(--font-semibold);
-    transition: all var(--transition-base);
-  }
-
-  .btn-primary:hover {
-    background: var(--color-primary-700);
-    transform: translateY(-2px);
-  }
-
-  /* ==================== ANIMATIONS ==================== */
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -474,31 +516,30 @@ const entries = surahEntries.map(entry => {
     }
   }
 
-  /* ==================== RESPONSIVE ==================== */
+  /* Responsive Adjustments matched from index.astro */
   @media (max-width: 768px) {
     .surah-hero {
-      padding: var(--space-10) 0 var(--space-8);
+      padding: var(--space-12) 0 var(--space-8);
     }
-
     .surah-title {
-      font-size: var(--text-3xl);
+      font-size: 2rem;
     }
-
     .surah-title-arabic {
-      font-size: var(--text-2xl);
+      font-size: 1.8rem;
     }
-
-    .entries-grid {
-      grid-template-columns: 1fr;
+    .surah-stats {
       gap: var(--space-4);
     }
-
-    .empty-state {
-      padding: var(--space-12) var(--space-6);
+    .stat-item {
+      min-width: 100px;
+      padding: var(--space-4);
+    }
+    .stat-value {
+      font-size: 1.5rem;
     }
   }
 
-  /* ==================== DARK MODE ==================== */
+  /* Dark Mode specific overrides */
   :global([data-theme="dark"]) .surah-hero {
     background: linear-gradient(
       135deg,
@@ -508,25 +549,295 @@ const entries = surahEntries.map(entry => {
     );
   }
 
-  :global([data-theme="dark"]) .hero-bg-pattern {
-    opacity: 0.15;
+  .font-amiri {
+    font-family: "Amiri", "Notfl", serif;
   }
 
-  :global([data-theme="dark"]) .entry-card {
-    background: var(--color-surface-variant);
+  .ayahs-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .ayah-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6) var(--space-8);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .ayah-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+    border-color: var(--color-primary-200);
+  }
+
+  .ayah-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-4);
+  }
+
+  .ayah-badge {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-50);
+    color: var(--color-primary-700);
+    border: 1px solid var(--color-primary-100);
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.95rem;
+    font-feature-settings: "tnum";
+  }
+
+  /* Audio Button Styles */
+  .btn-audio {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--color-neutral-200);
+    background: white;
+    color: var(--color-neutral-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-audio:hover {
+    background: var(--color-primary-50);
+    color: var(--color-primary-600);
+    border-color: var(--color-primary-200);
+    transform: scale(1.05);
+  }
+
+  .btn-audio.playing {
+    background: var(--color-primary-600);
+    color: white;
+    border-color: var(--color-primary-700);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
+  }
+
+  .btn-audio .icon-pause {
+    display: none;
+  }
+  .btn-audio.playing .icon-play {
+    display: none;
+  }
+  .btn-audio.playing .icon-pause {
+    display: block;
+  }
+
+  .ayah-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .arabic-text {
+    font-size: 2.6rem;
+    line-height: 2.2;
+    text-align: right;
+    color: #000;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+  }
+
+  /* Distinct Thai Translation */
+  .thai-translation {
+    background: linear-gradient(to right, var(--color-neutral-50), transparent);
+    border-left: 3px solid var(--color-primary-400);
+    padding: var(--space-4) var(--space-5);
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  }
+
+  .thai-text {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans); /* Use sans for better readability */
+  }
+
+  /* Tafsir Section - Separated Card */
+  .tafsir-card {
+    margin-top: calc(var(--space-2) * -1); /* Pull closer to ayah card above */
+    margin-bottom: var(--space-6);
+    background: var(--color-secondary-50);
+    border: 1px solid var(--color-secondary-100);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl); /* Rounded bottom only to attach visually? Or full card? */
+    /* Let's make it a full separate card but connected visually via proximity */
+    border-radius: var(--radius-xl);
+    margin-top: var(--space-2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Or better, make it look like a comment thread below */
+  .tafsir-card {
+    margin-top: var(--space-4);
+    background: #fdfdfd;
+    border-left: 4px solid var(--color-secondary-400);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .tafsir-header {
+    background: var(--color-secondary-50);
+    padding: var(--space-3) var(--space-5);
+    border-bottom: 1px solid var(--color-secondary-100);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.95rem;
+  }
+
+  .tafsir-content-wrapper {
+    padding: var(--space-5) var(--space-6);
+  }
+
+  /* Dark Mode Adjustments */
+  :global([data-theme="dark"]) .tafsir-card {
+    background: rgba(255, 255, 255, 0.02);
+    border-left-color: var(--color-secondary-600);
+  }
+
+  :global([data-theme="dark"]) .tafsir-header {
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  :global([data-theme="dark"]) .ayah-card {
+    background: var(--color-surface);
+    border-color: var(--color-neutral-800);
+  }
+
+  :global([data-theme="dark"]) .arabic-text {
+    color: #e0e0e0;
+  }
+
+  :global([data-theme="dark"]) .thai-translation {
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.03),
+      transparent
+    );
+    border-left-color: var(--color-primary-600);
+  }
+
+  :global([data-theme="dark"]) .btn-audio {
+    background: var(--color-neutral-800);
+    border-color: var(--color-neutral-700);
+    color: var(--color-neutral-400);
+  }
+
+  :global([data-theme="dark"]) .btn-audio:hover {
+    background: var(--color-neutral-700);
+    color: var(--color-primary-400);
+  }
+
+  :global([data-theme="dark"]) .btn-audio.playing {
+    background: var(--color-primary-600);
+    color: white;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 var(--space-4);
+    }
+    .ayah-card {
+      padding: var(--space-5);
+    }
+    .arabic-text {
+      font-size: 1.8rem;
+      line-height: 1.9;
+    }
+    .thai-text {
+      font-size: 1.05rem;
+    }
+    .btn-audio {
+      width: 38px;
+      height: 38px;
+    }
+  }
+
+  /* Search Bar Styles */
+  .search-wrapper {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 9999px;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--color-neutral-200);
+    transition: all 0.2s ease;
+  }
+
+  .search-wrapper:focus-within {
+    border-color: var(--color-primary-400);
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .search-icon {
+    color: var(--color-neutral-400);
+    margin-right: 0.75rem;
+    display: flex;
+  }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    background: transparent;
+    padding: 0.25rem 0;
+  }
+
+  .search-stats {
+    font-size: 0.85rem;
+    color: var(--color-primary-600);
+    background: var(--color-primary-50);
+    padding: 2px 10px;
+    border-radius: 9999px;
+    white-space: nowrap;
+    margin-left: 0.5rem;
+    font-weight: 500;
+  }
+
+  .search-stats.hidden {
+    display: none;
+  }
+
+  /* Dark Mode Search */
+  :global([data-theme="dark"]) .search-wrapper {
+    background: var(--color-surface);
     border-color: var(--color-neutral-700);
   }
 
-  :global([data-theme="dark"]) .entry-card:hover {
-    border-color: var(--color-secondary-500);
+  :global([data-theme="dark"]) .search-input {
+    color: white;
   }
 
-  :global([data-theme="dark"]) .card-header {
-    background: linear-gradient(135deg, var(--color-primary-100), var(--color-surface-variant));
-    border-color: var(--color-neutral-700);
-  }
-
-  :global([data-theme="dark"]) .nav-button:hover {
-    background: var(--color-primary-100);
+  :global([data-theme="dark"]) .search-stats {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-neutral-300);
   }
 </style>

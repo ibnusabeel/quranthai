@@ -1,83 +1,68 @@
 import { config, fields, collection } from '@keystatic/core';
-import { SURAHS } from './src/data/surahs';
 
-// Helper to pad numbers (e.g., 1 -> "001")
-const pad = (num: number) => num.toString().padStart(3, '0');
+// Helper to define a Book Collection
+const createBookCollection = (bookSlug: string, bookLabel: string) => {
+    return collection({
+        label: bookLabel,
+        slugField: 'title',
+        // Stores each Surah as a folder: src/content/tafsir/tafsir-sadi/001/index.mdoc
+        path: `src/content/tafsir/${bookSlug}/*/index`,
+        format: { contentField: 'content' },
+        entryLayout: 'form',
+        columns: ['surahNumber', 'nameThai', 'nameArabic'],
+        schema: {
+            title: fields.slug({
+                name: {
+                    label: 'รหัสสูเราะห์ (เช่น 001, 018)',
+                    description: 'ต้องเป็นตัวเลข 3 หลักเสมอ เพื่อให้เรียงลำดับถูกต้อง เช่น 001, 002, ..., 114'
+                }
+            }),
+            // Surah Info
+            surahNumber: fields.integer({
+                label: 'ลำดับที่ (Surah Number)',
+                validation: { min: 1, max: 114 },
+                description: 'ลำดับที่ของสูเราะห์ในอัลกุรอาน'
+            }),
+            nameThai: fields.text({
+                label: 'ชื่อสูเราะห์ (ภาษาไทย)',
+                validation: { length: { min: 1 } },
+                description: 'เช่น: อัล-ฟาติหะฮฺ'
+            }),
+            nameArabic: fields.text({
+                label: 'ชื่อสูเราะห์ (ภาษาอาหรับ)',
+                validation: { length: { min: 1 } },
+                description: 'เช่น: الفاتحة'
+            }),
+            content: fields.document({
+                label: 'บทนำ / เนื้อหาภาพรวม',
+                formatting: true,
+                dividers: true,
+                links: true,
+                images: true,
+            }),
 
-// Generate Collections for a specific Book
-const createBookCollections = (bookSlug: string, bookLabel: string) => {
-    const collections: Record<string, any> = {};
-
-    SURAHS.forEach(surah => {
-        const surahKey = `${bookSlug}_${pad(surah.number)}`;
-        const folderName = `${pad(surah.number)}-${surah.nameArabic.replace(/ /g, '-')}`; // Simplistic folder naming
-        // Better folder naming: 001-al-fatiha (using a simple mapping or just number)
-        // Let's use 001-{number} to keep it simple and safe, or mapping if available. 
-        // Since we don't have English slug in SURAHS yet, checking data... 
-        // The previous prompt SURAHS didn't have english slug. 
-        // Let's use just number to be safe: src/content/tafsir/tafsir-sadi/001/*
-        // User asked for "separate folder", numbering is best for sorting.
-
-        // Update: Using generic path or we can use the Thai name sanitized? 
-        // "001" is safest.
-
-        collections[surahKey] = collection({
-            label: `${surah.number}. ${surah.nameThai} (${surah.nameArabic})`,
-            slugField: 'title',
-            path: `src/content/tafsir/${bookSlug}/${pad(surah.number)}/*`,
-            format: { contentField: 'content' },
-            entryLayout: 'content',
-            columns: ['ayahStart', 'ayahEnd', 'title'],
-            schema: {
-                title: fields.slug({
-                    name: {
-                        label: 'ชื่อไฟล์ / อ้างอิง (Reference)',
-                        description: 'เช่น part-1'
-                    }
-                }),
-                // Hidden/Read-only Surah Number
-                surahNumber: fields.integer({
-                    label: 'Surah Number (Auto)',
-                    defaultValue: surah.number,
-                    description: 'ห้ามแก้ไข'
-                }),
-                ayahStart: fields.integer({
-                    label: 'อายะฮ์เริ่มต้น',
-                    validation: { min: 1 }
-                }),
-                ayahEnd: fields.integer({
-                    label: 'อายะฮ์สิ้นสุด',
-                    validation: { min: 1 }
-                }),
-                // [NEW] Individual Ayah Texts
-                ayahs: fields.array(
-                    fields.object({
-                        ayahNumber: fields.integer({ label: 'อายะฮ์ที่' }),
-                        arabic: fields.text({ label: 'ตัวบทอาหรับ (Arabic)', multiline: true }),
-                        thai: fields.text({ label: 'คำแปลไทย (Thai)', multiline: true }),
+            // Individual Ayah Texts with Audio & Description
+            ayahs: fields.array(
+                fields.object({
+                    ayahNumber: fields.integer({ label: 'อายะฮ์ที่ (No.)' }),
+                    arabic: fields.text({ label: 'ตัวบทกุรอ่าน (อาหรับ)', multiline: true }),
+                    thai: fields.text({ label: 'คำแปล (ไทย)', multiline: true }),
+                    audio: fields.text({ label: 'ลิงก์เสียงอ่าน (Audio URL)', description: 'รูปแบบ: https://...mp3' }),
+                    tafsirRange: fields.text({ label: 'ช่วงอายะห์ที่', description: 'รูปแบบ: 1-5 เป็นต้น' }),
+                    description: fields.text({
+                        label: 'เนื้อหาตัฟซีร (คำอธิบาย)',
+                        multiline: true,
+                        description: 'ใส่เนื้อหาคำอธิบายที่นี่ (รองรับ Markdown อย่างง่าย)'
                     }),
-                    {
-                        label: 'รายการอายะฮ์ (Ayahs)',
-                        itemLabel: (props) => `อายะฮ์ที่ ${props.fields.ayahNumber.value || '-'}`,
-                    }
-                ),
-                content: fields.document({
-                    label: 'เนื้อหาตัฟซีร',
-                    formatting: true,
-                    dividers: true,
-                    links: true,
-                    images: true,
                 }),
-            },
-        });
+                {
+                    label: 'รายการอายะฮ์ (Ayahs)',
+                    itemLabel: (props) => `อายะฮ์ที่ ${props.fields.ayahNumber.value || '-'}`,
+                }
+            ),
+        },
     });
-
-    return collections;
 };
-
-// Generate collections
-const sadiCollections = createBookCollections('tafsir-sadi', 'ตัฟซีร อัส-สะอฺดีย์');
-const ibnKasirCollections = createBookCollections('tafsir-ibnkasir', 'ตัฟซีร อิบนุกาซีร');
 
 export default config({
     storage: {
@@ -86,8 +71,7 @@ export default config({
     ui: {
         navigation: {
             'ข้อมูลหลัก': ['books'],
-            '📖 ตัฟซีร อัส-สะอฺดีย์': Object.keys(sadiCollections),
-            // '📖 ตัฟซีร อิบนุกาซีร': Object.keys(ibnKasirCollections),
+            '📖 หนังสือตัฟซีร': ['tafsir-sadi', 'tafsir-ibnkasir'],
         }
     },
     collections: {
@@ -107,11 +91,12 @@ export default config({
                     formatting: true,
                     dividers: true,
                     links: true,
+                    images: true,
                 }),
                 coverImage: fields.text({ label: 'URL รูปหน้าปก (ถ้ามี)' }),
             },
         }),
-        ...sadiCollections,
-        ...ibnKasirCollections,
+        'tafsir-sadi': createBookCollection('tafsir-sadi', 'ตัฟซีร อัส-สะอฺดีย์'),
+        'tafsir-ibnkasir': createBookCollection('tafsir-ibnkasir', 'ตัฟซีร อิบนุกาซีร'),
     },
 });

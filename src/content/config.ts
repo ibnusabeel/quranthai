@@ -1,4 +1,5 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const booksCollection = defineCollection({
     type: 'content',
@@ -13,16 +14,18 @@ const booksCollection = defineCollection({
 });
 
 const tafsirCollection = defineCollection({
-    type: 'content',
+    loader: glob({ pattern: '**/index.mdoc', base: "./src/content/tafsir" }),
     schema: z.object({
         surahNumber: z.coerce.number(),
         title: z.string().optional(),
-        ayahStart: z.number(),
-        ayahEnd: z.number(),
+        nameThai: z.string().optional(),
+        nameArabic: z.string().optional(),
         ayahs: z.array(z.object({
             ayahNumber: z.number(),
             arabic: z.string().optional(),
             thai: z.string().optional(),
+            audio: z.string().optional(),
+            description: z.string().optional(), // Stores plain text description
         })).optional(),
     }),
 });

@@ -1,0 +1,40 @@
+> StartFragment
+> 
+> มีครับ สำหรับ API กุรอ่านที่มีคำแปลภาษาไทย (Thai Translation) ปัจจุบันมีตัวเลือกที่เป็น Open Source และใช้งานฟรีอยู่ 3-4 แหล่งหลัก ซึ่งเป็นที่นิยมในหมู่นักพัฒนาครับ
+> 
+> นี่คือรายการ API ที่แนะนำ พร้อมวิธีเรียกใช้งานเพื่อให้ได้เนื้อหาภาษาไทย:
+> 
+> ### 1. Al-Quran Cloud API (แนะนำ: ใช้งานง่ายสุด)
+> 
+> เป็น REST API ที่มีเอกสารครบถ้วนและรองรับภาษาไทยโดยตรง โดยใช้ identifier เป็น `th.thai` (สำนวนแปลโดยสมาคมนักเรียนเก่าอาหรับ)
+> 
+> - **Endpoint สำหรับอ่านทั้งเล่ม (แปลไทย):**\
+  `http://api.alquran.cloud/v1/quran/th.thai`
+
+- **Endpoint สำหรับอ่านแยกตาม Surah (เช่น บทที่ 1):**\
+  `http://api.alquran.cloud/v1/surah/1/th.thai`
+- **Documentation:** [Al-Quran Cloud API Docs](https://alquran.cloud/api)
+
+> ### 2. QuranEnc API (Encyclopedia of the Noble Quran)
+> 
+> แหล่งนี้โดดเด่นเรื่องความถูกต้องของวิชาการ และมีการระบุ key สำหรับภาษาไทยอย่างชัดเจนคือ `thai_complex`
+> 
+> - **Endpoint (ตัวอย่างเรียกดูบทที่ 1):**\
+  `https://quranenc.com/api/v1/translation/sura/thai_complex/1`
+
+- **Endpoint (ตัวอย่างเรียกดูเฉพาะอายะห์):**\
+  `https://quranenc.com/api/v1/translation/aya/thai_complex/1/1`
+- **Key ที่ใช้:** `thai_complex`
+
+> ### 3. fawazahmed0/quran-api (เหมาะสำหรับ Static JSON)
+> 
+> หากคุณต้องการไฟล์ JSON นิ่งๆ เพื่อโหลดเก็บไว้ในแอป (ไม่ต้องเรียก API บ่อยๆ) แนะนำตัวนี้ครับ เป็นโปรเจกต์บน GitHub ที่รวบรวมคำแปลไว้เยอะมาก
+> 
+> - **ไฟล์รายชื่อ Edition ทั้งหมด:**\
+  `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions.json`\
+  *(ให้ค้นหาคำว่า "thai" ในไฟล์นี้เพื่อดูชื่อไฟล์ที่ต้องการ)*
+
+- **ตัวอย่าง URL ไฟล์แปลไทย (อาจมีการเปลี่ยนแปลงชื่อไฟล์ แนะนำให้เช็คจากลิงก์ข้างบนก่อน):**\
+  `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/tha-`
+
+> EndFragment

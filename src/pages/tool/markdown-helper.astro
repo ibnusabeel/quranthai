@@ -1,0 +1,548 @@
+---
+import Layout from "../../components/Layout.astro";
+
+// This page is a simple tool for editors to generate Markdown
+---
+
+<Layout title="เครื่องมือช่วยเขียน Markdown">
+    <div class="min-h-screen bg-neutral-100 font-sans">
+        <!-- Navbar / Header -->
+        <header class="bg-white border-b border-neutral-200 sticky top-0 z-50">
+            <div
+                class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between"
+            >
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-primary-50 text-primary-600 rounded-lg">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            ><path
+                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                            ></path><path
+                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                            ></path></svg
+                        >
+                    </div>
+                    <div>
+                        <h1
+                            class="text-lg font-bold text-neutral-800 leading-tight"
+                        >
+                            Editor
+                        </h1>
+                        <p class="text-xs text-neutral-500">
+                            เครื่องมือเขียนคำอธิบาย ตัฟซีร
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button
+                        id="btn-clear"
+                        class="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                        ล้างข้อมูล
+                    </button>
+                    <button
+                        id="btn-copy"
+                        class="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-lg font-medium transition-all shadow-sm hover:shadow-md active:scale-95"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            ><rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"></rect><path
+                                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                            ></path></svg
+                        >
+                        <span>คัดลอกโค้ด</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="border-t border-neutral-100 bg-white">
+                <div
+                    class="max-w-5xl mx-auto px-2 py-1 flex flex-wrap items-center gap-1"
+                >
+                    <!-- Headings -->
+                    <div
+                        class="flex items-center gap-1 p-1 border-r border-neutral-200 pr-2 mr-1"
+                    >
+                        <button
+                            class="toolbar-btn font-bold text-lg px-3"
+                            data-cmd="formatBlock"
+                            data-val="H3"
+                            title="หัวข้อหลัก (H1)">H1</button
+                        >
+                        <button
+                            class="toolbar-btn font-semibold text-base px-3"
+                            data-cmd="formatBlock"
+                            data-val="H4"
+                            title="หัวข้อรอง (H2)">H2</button
+                        >
+                    </div>
+
+                    <!-- Basics -->
+                    <div
+                        class="flex items-center gap-1 p-1 border-r border-neutral-200 pr-2 mr-1"
+                    >
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="bold"
+                            title="ตัวหนา (Ctrl+B)"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                ><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"
+                                ></path><path
+                                    d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"
+                                ></path></svg
+                            >
+                        </button>
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="italic"
+                            title="ตัวเอียง (Ctrl+I)"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                ><polyline points="19 4 15 12 11 20"
+                                ></polyline><line x1="15" y1="4" x2="9" y2="4"
+                                ></line><line x1="14" y1="20" x2="8" y2="20"
+                                ></line></svg
+                            >
+                        </button>
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="formatBlock"
+                            data-val="blockquote"
+                            title="อ้างอิง (Quote)"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                ><path
+                                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                                ></path></svg
+                            >
+                        </button>
+                    </div>
+
+                    <!-- Alignment -->
+                    <div
+                        class="flex items-center gap-1 p-1 border-r border-neutral-200 pr-2 mr-1"
+                    >
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="justifyLeft"
+                            title="ชิดซ้าย"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                ><line x1="17" y1="10" x2="3" y2="10"
+                                ></line><line x1="21" y1="6" x2="3" y2="6"
+                                ></line><line x1="21" y1="14" x2="3" y2="14"
+                                ></line><line x1="17" y1="18" x2="3" y2="18"
+                                ></line></svg
+                            >
+                        </button>
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="justifyCenter"
+                            title="กึ่งกลาง"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                ><line x1="21" y1="6" x2="3" y2="6"></line><line
+                                    x1="17"
+                                    y1="10"
+                                    x2="7"
+                                    y2="10"></line><line
+                                    x1="19"
+                                    y1="14"
+                                    x2="5"
+                                    y2="14"></line><line
+                                    x1="17"
+                                    y1="18"
+                                    x2="7"
+                                    y2="18"></line></svg
+                            >
+                        </button>
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="justifyRight"
+                            title="ชิดขวา"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                ><line x1="21" y1="6" x2="3" y2="6"></line><line
+                                    x1="21"
+                                    y1="10"
+                                    x2="7"
+                                    y2="10"></line><line
+                                    x1="21"
+                                    y1="14"
+                                    x2="5"
+                                    y2="14"></line><line
+                                    x1="21"
+                                    y1="18"
+                                    x2="7"
+                                    y2="18"></line></svg
+                            >
+                        </button>
+                    </div>
+
+                    <!-- Lists -->
+                    <div class="flex items-center gap-1 p-1">
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="insertUnorderedList"
+                            title="รายการจุด"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                ><line x1="8" y1="6" x2="21" y2="6"></line><line
+                                    x1="8"
+                                    y1="12"
+                                    x2="21"
+                                    y2="12"></line><line
+                                    x1="8"
+                                    y1="18"
+                                    x2="21"
+                                    y2="18"></line><line
+                                    x1="3"
+                                    y1="6"
+                                    x2="3.01"
+                                    y2="6"></line><line
+                                    x1="3"
+                                    y1="12"
+                                    x2="3.01"
+                                    y2="12"></line><line
+                                    x1="3"
+                                    y1="18"
+                                    x2="3.01"
+                                    y2="18"></line></svg
+                            >
+                        </button>
+                        <button
+                            class="toolbar-btn"
+                            data-cmd="insertOrderedList"
+                            title="รายการตัวเลข"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                ><line x1="10" y1="6" x2="21" y2="6"
+                                ></line><line x1="10" y1="12" x2="21" y2="12"
+                                ></line><line x1="10" y1="18" x2="21" y2="18"
+                                ></line><path d="M4 6h1v4"></path><path
+                                    d="M4 10h2"></path><path
+                                    d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"
+                                ></path></svg
+                            >
+                        </button>
+                        <button
+                            class="toolbar-btn text-red-500 hover:text-red-600"
+                            data-cmd="removeFormat"
+                            title="ล้างรูปแบบ"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                ><polyline points="3 6 5 6 21 6"
+                                ></polyline><path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                ></path></svg
+                            >
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Document Area -->
+        <main class="py-8 px-4 flex justify-center">
+            <div
+                class="bg-white w-full max-w-[850px] min-h-[1100px] shadow-sm hover:shadow-md transition-shadow border border-neutral-200 rounded-sm p-12 relative"
+            >
+                <!-- Placeholder Logic in CSS -->
+                <div
+                    id="editor"
+                    contenteditable="true"
+                    class="editor-prose prose prose-lg max-w-none outline-none text-neutral-800"
+                    placeholder="พิมพ์เนื้อหาที่นี่..."
+                >
+                    <p>เริ่มพิมพ์เนื้อหาของคุณที่นี่...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Floating Feedback Toast -->
+        <div
+            id="toast"
+            class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-neutral-900 text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity z-50 flex items-center gap-3 pointer-events-none"
+        >
+            <span id="toast-icon">✅</span>
+            <span id="toast-message">คัดลอกเรียบร้อย</span>
+        </div>
+
+        <!-- Hidden Output for Copy -->
+        <textarea id="hidden-output" class="hidden"></textarea>
+    </div>
+</Layout>
+
+<style>
+    /* Premium Font Styling */
+    .editor-prose {
+        line-height: 1.8;
+    }
+
+    /* Placeholder */
+    .editor-prose:empty:before {
+        content: attr(placeholder);
+        color: #9ca3af;
+        pointer-events: none;
+        position: absolute;
+    }
+
+    /* Blockquote Styling inside Editor */
+    :global(blockquote) {
+        border-left: 4px solid #e5e7eb;
+        padding-left: 1rem;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+        color: #4b5563;
+    }
+
+    /* Toolbar Buttons */
+    .toolbar-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        color: #4b5563;
+        transition: all 0.2s;
+    }
+    .toolbar-btn:hover {
+        background-color: #f3f4f6;
+        color: #111827;
+    }
+    .toolbar-btn:active {
+        background-color: #e5e7eb;
+    }
+
+    /* Paper Effect */
+    body {
+        background-color: #f3f4f6; /* Neutral 100 */
+    }
+</style>
+
+<script>
+    const editor = document.getElementById("editor");
+    const toolbarBtns = document.querySelectorAll(".toolbar-btn");
+    const btnCopy = document.getElementById("btn-copy");
+    const btnClear = document.getElementById("btn-clear");
+    const hiddenOutput = document.getElementById(
+        "hidden-output",
+    ) as HTMLTextAreaElement;
+
+    const toast = document.getElementById("toast");
+    const toastMsg = document.getElementById("toast-message");
+
+    function showToast(msg: string) {
+        if (!toast || !toastMsg) return;
+        toastMsg.textContent = msg;
+        toast.style.opacity = "1";
+        toast.style.transform = "translate(-50%, 0)";
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translate(-50%, 10px)";
+        }, 2500);
+    }
+
+    // Toolbar Logic
+    toolbarBtns.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const cmd = btn.getAttribute("data-cmd");
+            const val = btn.getAttribute("data-val");
+
+            if (cmd) {
+                document.execCommand(cmd, false, val || undefined);
+                editor?.focus();
+            }
+        });
+    });
+
+    if (btnClear && editor) {
+        btnClear.addEventListener("click", () => {
+            if (confirm("ต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?")) {
+                editor.innerHTML = "<p><br></p>";
+                editor.focus();
+            }
+        });
+    }
+
+    // HTML to Markdown Converter (Preserved & Enhanced)
+    function htmlToMarkdown(html: string) {
+        let md = html;
+        // Clean spans
+        md = md.replace(/<span[^>]*>/gi, "");
+        md = md.replace(/<\/span>/gi, "");
+
+        // Headings
+        md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, "\n### $1\n");
+        md = md.replace(/<h4[^>]*>(.*?)<\/h4>/gi, "\n#### $1\n");
+        md = md.replace(/<div[^>]*><br><\/div>/gi, "\n");
+
+        // Alignment
+        md = md.replace(
+            /<div style="text-align: center;">(.*?)<\/div>/gi,
+            '<p align="center">$1</p>\n',
+        );
+        md = md.replace(
+            /<div style="text-align: right;">(.*?)<\/div>/gi,
+            '<p align="right">$1</p>\n',
+        );
+        md = md.replace(
+            /<div style="text-align: left;">(.*?)<\/div>/gi,
+            "$1\n",
+        );
+
+        // P alignment (sometimes execCommand uses p align)
+        md = md.replace(
+            /<p align="center">(.*?)<\/p>/gi,
+            '<p align="center">$1</p>\n',
+        );
+
+        // Blockquote
+        md = md.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gi, "\n> $1\n");
+
+        // Styles
+        md = md.replace(/<b[^>]*>(.*?)<\/b>/gi, "**$1**");
+        md = md.replace(/<strong[^>]*>(.*?)<\/strong>/gi, "**$1**");
+        md = md.replace(/<i[^>]*>(.*?)<\/i>/gi, "*$1*");
+        md = md.replace(/<em[^>]*>(.*?)<\/em>/gi, "*$1*");
+
+        // Lists
+        md = md.replace(/<ul[^>]*>/gi, "\n");
+        md = md.replace(/<\/ul>/gi, "\n");
+        md = md.replace(/<li[^>]*>(.*?)<\/li>/gi, "- $1\n");
+        md = md.replace(/<ol[^>]*>/gi, "\n");
+        md = md.replace(/<\/ol>/gi, "\n");
+
+        // Cleanup Divs/Ps
+        md = md.replace(/<div[^>]*>/gi, "\n");
+        md = md.replace(/<\/div>/gi, "");
+        md = md.replace(/<br\s*\/?>/gi, "\n");
+        md = md.replace(/<p[^>]*>/gi, "\n");
+        md = md.replace(/<\/p>/gi, "\n");
+
+        // Entities
+        md = md.replace(/&nbsp;/g, " ");
+        md = md.replace(/&amp;/g, "&");
+        md = md.replace(/&lt;/g, "<");
+        md = md.replace(/&gt;/g, ">");
+
+        md = md.replace(/\n\s*\n/g, "\n\n");
+        md = md.replace(/\n>\s+/g, "\n> "); // Trim quote space
+
+        return md.trim();
+    }
+
+    if (btnCopy && editor) {
+        btnCopy.addEventListener("click", () => {
+            const markdown = htmlToMarkdown(editor.innerHTML);
+
+            // Clipboard API
+            if (navigator.clipboard) {
+                navigator.clipboard
+                    .writeText(markdown)
+                    .then(() => {
+                        showToast("คัดลอกโค้ดสำเร็จ!");
+                    })
+                    .catch((err) => {
+                        showToast("เกิดข้อผิดพลาดในการคัดลอก");
+                        console.error(err);
+                    });
+            }
+        });
+    }
+</script>
+```; ---
