@@ -61,7 +61,7 @@
   /* === Typography === */
   /* Font Families */
   --font-primary: 'Sarabun', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-arabic: 'Amiri', 'Traditional Arabic', 'Arabic Typesetting', serif;
+  --font-arabic: 'Uthmanic', 'Amiri', 'Traditional Arabic', 'Arabic Typesetting', serif;
   --font-mono: 'JetBrains Mono', 'Consolas', monospace;
 
   /* Font Sizes - Responsive Scale */

@@ -49,10 +49,11 @@ const createBookCollection = (bookSlug: string, bookLabel: string) => {
                     thai: fields.text({ label: 'คำแปล (ไทย)', multiline: true }),
                     audio: fields.text({ label: 'ลิงก์เสียงอ่าน (Audio URL)', description: 'รูปแบบ: https://...mp3' }),
                     tafsirRange: fields.text({ label: 'ช่วงอายะห์ที่', description: 'รูปแบบ: 1-5 เป็นต้น' }),
-                    description: fields.text({
+                    description: fields.document({
                         label: 'เนื้อหาตัฟซีร (คำอธิบาย)',
-                        multiline: true,
-                        description: 'ใส่เนื้อหาคำอธิบายที่นี่ (รองรับ Markdown อย่างง่าย)'
+                        formatting: true,
+                        dividers: true,
+                        links: true,
                     }),
                 }),
                 {

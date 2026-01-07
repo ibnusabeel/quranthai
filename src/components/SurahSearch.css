@@ -195,7 +195,7 @@
 }
 
 .surah-name-arabic {
-    font-family: 'Amiri', 'Traditional Arabic', serif;
+    font-family: 'Uthmanic', 'Amiri', 'Traditional Arabic', serif;
     font-size: var(--text-2xl);
     color: var(--color-primary-600);
     margin-bottom: var(--space-4);

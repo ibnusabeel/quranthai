@@ -14,9 +14,9 @@ const booksCollection = defineCollection({
 });
 
 const tafsirCollection = defineCollection({
-    loader: glob({ pattern: '**/index.mdoc', base: "./src/content/tafsir" }),
+    loader: glob({ pattern: '**/*.mdoc', base: "./src/content/tafsir" }),
     schema: z.object({
-        surahNumber: z.coerce.number(),
+        surahNumber: z.coerce.number().optional(),
         title: z.string().optional(),
         nameThai: z.string().optional(),
         nameArabic: z.string().optional(),
@@ -25,7 +25,7 @@ const tafsirCollection = defineCollection({
             arabic: z.string().optional(),
             thai: z.string().optional(),
             audio: z.string().optional(),
-            description: z.string().optional(), // Stores plain text description
+            description: z.any(), // Supports both string and Markdoc AST
         })).optional(),
     }),
 });

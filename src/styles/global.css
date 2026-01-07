@@ -2,6 +2,18 @@
 @import './design-system.css';
 
 /* ==========================================
+   CUSTOM FONTS
+   ========================================== */
+
+@font-face {
+    font-family: 'Uthmanic';
+    src: url('/fonts/UthmanTNB_v2-0.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ==========================================
    GLOBAL STYLES
    ========================================== */
 
@@ -98,7 +110,7 @@ a:hover {
 }
 
 .text-arabic {
-    font-family: var(--font-arabic);
+    font-family: 'Uthmanic', var(--font-arabic);
     direction: rtl;
     text-align: right;
     line-height: var(--leading-loose);
@@ -116,7 +128,7 @@ p[dir="rtl"],
 p:lang(ar),
 .content-body p:lang(ar),
 .tafsir-content p:lang(ar) {
-    font-family: var(--font-arabic);
+    font-family: 'Uthmanic', var(--font-arabic);
     direction: rtl;
     text-align: right;
     line-height: 2;
@@ -127,11 +139,11 @@ p:lang(ar),
 .arabic-text,
 p.arabic-text,
 div.arabic-text {
-    font-family: var(--font-arabic) !important;
+    font-family: 'Uthmanic', var(--font-arabic) !important;
     direction: rtl !important;
     text-align: right !important;
     line-height: 2 !important;
-    font-size: var(--text-xl) !important;
+
     margin-bottom: var(--space-4);
 }
 

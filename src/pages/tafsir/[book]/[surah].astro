@@ -209,9 +209,9 @@ const bookInfo = bookEntry
                   </div>
 
                   <div class="ayah-content">
-                    <p class="arabic-text font-amiri" dir="rtl">
+                    <div class="arabic-text font-amiri" dir="rtl">
                       {ayah.arabic}
-                    </p>
+                    </div>
                     <div class="thai-translation">
                       <p class="thai-text">{ayah.thai}</p>
                     </div>
@@ -589,7 +589,7 @@ const bookInfo = bookEntry
   }
 
   .font-amiri {
-    font-family: "Amiri", "Notfl", serif;
+    font-family: "Uthmanic", "Amiri", serif;
   }
 
   .ayahs-list {
@@ -751,12 +751,13 @@ const bookInfo = bookEntry
   }
 
   .arabic-text {
-    font-size: 2.8rem;
+    font-family: "Uthmanic", "Amiri", serif;
+    font-size: 1.6rem;
     line-height: 2.4;
     text-align: right;
-    color: var(--color-neutral-900);
+    color: var(--color-primary-700);
     margin-bottom: var(--space-2);
-    font-weight: 500;
+    font-weight: 100;
     padding: var(--space-4);
     background: linear-gradient(to left, rgba(59, 130, 246, 0.03), transparent);
     border-radius: var(--radius-lg);
@@ -940,7 +941,7 @@ const bookInfo = bookEntry
       padding: var(--space-5);
     }
     .arabic-text {
-      font-size: 1.8rem;
+      font-size: 2rem;
       line-height: 1.9;
     }
     .thai-text {
