@@ -25,6 +25,14 @@ bookTafsir.forEach((entry) => {
 
 // Convert Set to Array for prop passing
 const availableSurahsArray = Array.from(availableSurahs);
+
+// Count total ayahs with tafsir (description files with actual content)
+const tafsirAyahCount = bookTafsir.filter(
+  (entry) =>
+    entry.id.includes("/description") &&
+    entry.body &&
+    entry.body.trim().length > 0,
+).length;
 ---
 
 <Layout title={bookEntry?.data.titleThai || "Tafsir"}>
@@ -69,8 +77,8 @@ const availableSurahsArray = Array.from(availableSurahs);
           </div>
           <div class="stat-item">
             <div class="stat-icon">📝</div>
-            <div class="stat-value">{bookTafsir.length}</div>
-            <div class="stat-label">บทความ</div>
+            <div class="stat-value">{tafsirAyahCount}</div>
+            <div class="stat-label">กลุ่มอายะห์ที่ตัฟซีรแล้ว</div>
           </div>
         </div>
       </div>

@@ -137,9 +137,7 @@ export default function SurahSearch({ surahs, availableSurahs, bookSlug }: Surah
                 )}
             </div>
 
-            <div className="add-more-notice">
-                <p>💡 <strong>สำหรับผู้ดูแลระบบ:</strong> <a href="/keystatic" className="cms-link">เข้าสู่ CMS</a> เพื่อเพิ่มเนื้อหาตัฟซีรในซูเราะห์ที่ยังว่างอยู่</p>
-            </div>
+
         </div>
     );
 }
