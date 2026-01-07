@@ -4,6 +4,16 @@ import SurahCard from "../../../components/SurahCard.astro";
 import { getCollection, getEntry } from "astro:content";
 import { SURAHS } from "../../../data/surahs";
 
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Define all book slugs that should be prerendered
+  return [
+    { params: { book: "tafsir-sadi" } },
+    { params: { book: "tafsir-ibnkasir" } },
+  ];
+}
+
 const { book } = Astro.params;
 
 // โหลดข้อมูลหนังสือจากไฟล์ MDX

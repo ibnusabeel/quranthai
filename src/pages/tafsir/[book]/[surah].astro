@@ -1,10 +1,38 @@
 ---
 import Layout from "../../../components/Layout.astro";
-import { getEntry } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Markdoc from "@markdoc/markdoc";
 const { Node, transform, renderers, parse } = Markdoc;
 
-export const prerender = false;
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Get all tafsir entries to determine valid surah routes
+  const allTafsir = await getCollection("tafsir");
+
+  // Find unique book/surah combinations from index files
+  const paths: { params: { book: string; surah: string } }[] = [];
+  const seen = new Set<string>();
+
+  allTafsir.forEach((entry) => {
+    // Only process index files (main surah entries)
+    if (entry.data.surahNumber && !entry.id.includes("/description")) {
+      const bookMatch = entry.id.match(/^([^/]+)\//);
+      if (bookMatch) {
+        const book = bookMatch[1];
+        const surah = entry.data.surahNumber.toString();
+        const key = `${book}/${surah}`;
+
+        if (!seen.has(key)) {
+          seen.add(key);
+          paths.push({ params: { book, surah } });
+        }
+      }
+    }
+  });
+
+  return paths;
+}
 
 const { book, surah: surahParam } = Astro.params;
 const surahNumber = parseInt(surahParam as string);
