@@ -272,12 +272,23 @@ const bookInfo = bookEntry
     const thaiEl = card.querySelector(".thai-text");
     const ayahBadge = card.querySelector(".ayah-badge");
 
+    // Get associated tafsir card (next sibling)
+    const cardEl = card as HTMLElement;
+    const nextEl = cardEl.nextElementSibling as HTMLElement;
+    const tafsirCard = nextEl?.classList.contains("tafsir-card")
+      ? nextEl
+      : null;
+    const tafsirContentEl = tafsirCard?.querySelector(".prose");
+
     cardData.set(card, {
       arabicEl,
       thaiEl,
       ayahBadge,
+      tafsirCard,
+      tafsirContentEl,
       originalArabic: arabicEl?.textContent || "",
       originalThai: thaiEl?.textContent || "",
+      originalTafsir: tafsirContentEl?.textContent || "",
       ayahNum: ayahBadge?.textContent || "",
     });
   });
@@ -301,11 +312,12 @@ const bookInfo = bookEntry
         const data = cardData.get(card);
         const cardEl = card as HTMLElement;
 
-        // Logic: Match Number, Arabic, or Thai
+        // Logic: Match Number, Arabic, Thai, or Tafsir Description
         const isMatch =
           data.ayahNum.includes(term) ||
           data.originalArabic.toLowerCase().includes(term) ||
-          data.originalThai.toLowerCase().includes(term);
+          data.originalThai.toLowerCase().includes(term) ||
+          data.originalTafsir.toLowerCase().includes(term);
 
         // Handle associated Tafsir Card (next sibling)
         const nextEl = cardEl.nextElementSibling as HTMLElement;
@@ -325,10 +337,20 @@ const bookInfo = bookEntry
               );
             if (data.thaiEl)
               data.thaiEl.innerHTML = highlightText(data.originalThai, term);
+            // Highlight Tafsir content
+            if (data.tafsirContentEl && data.originalTafsir) {
+              data.tafsirContentEl.innerHTML = highlightText(
+                data.originalTafsir,
+                term,
+              );
+            }
           } else {
             // Reset
             if (data.arabicEl) data.arabicEl.textContent = data.originalArabic;
             if (data.thaiEl) data.thaiEl.textContent = data.originalThai;
+            if (data.tafsirContentEl && data.originalTafsir) {
+              data.tafsirContentEl.textContent = data.originalTafsir;
+            }
           }
         } else {
           cardEl.style.display = "none";
